@@ -1,0 +1,185 @@
+"""Upstage API 래퍼.
+
+★ 사용자 작업 영역 ★
+아래 4개 함수의 본문(_real_*)을 Upstage 실제 호출로 채우세요.
+인터페이스(인자/반환 타입)는 바꾸지 마세요. pipeline 이 이 시그니처에 의존합니다.
+
+- classify(file_bytes, filename) -> str        : 문서 종류 라벨 (예: "임대차계약서")
+- parse(file_bytes, filename)    -> str         : 문서 전체 텍스트 (Document Parse)
+- extract(text)                  -> dict        : summary 사실 필드 (Universal Extraction)
+- chat(messages)                 -> str         : LLM 응답 원문 (JSON 문자열 기대)
+
+USE_FAKE_UPSTAGE=true 면 캔드 데이터를 반환합니다 (키 없이 데모/테스트용).
+"""
+import base64
+import json
+import os
+
+
+def _fake() -> bool:
+    return os.getenv("USE_FAKE_UPSTAGE", "false").lower() == "true"
+
+
+# ---------- Fake (데모/테스트용) ----------
+
+def _fake_summary() -> dict:
+    return {
+        "type": "전세 임대차 계약",
+        "parties": "임대인 OOO, 임차인 OOO",
+        "deposit": "100,000,000원",
+        "monthlyRent": "없음",
+        "duration": "2024.06.01 ~ 2026.05.31",
+        "moveInDate": "2024.06.01",
+        "balanceDate": "2024.05.31",
+        "maintenanceFee": "월 80,000원, 세부 항목 추가 확인 필요",
+        "realtor": "OO공인중개사무소, 중개사 OOO",
+    }
+
+
+def _fake_chat_json() -> str:
+    from app.scaffold import RISK_IDS
+    assessments = {
+        rid: {
+            "level": "확인 필요",
+            "status": "외부 서류 확인 필요",
+            "currentFinding": "계약서 기준으로는 확인되나 외부 자료 대조가 필요합니다.",
+            "action": "관련 공적 서류를 확인하세요.",
+            "questions": ["관련 증빙을 보여줄 수 있나요?"],
+        }
+        for rid in RISK_IDS
+    }
+    return json.dumps({
+        "assessments": assessments,
+        "finalComment": "현재 업로드된 계약서 기준으로는 일부 항목만 확인됩니다. 외부 자료 확인 후 계약을 진행하세요.",
+    }, ensure_ascii=False)
+
+
+# ---------- 실제 Upstage 호출 (_real_*) ----------
+
+def _api_key() -> str:
+    key = os.getenv("UPSTAGE_API_KEY")
+    if not key:
+        raise RuntimeError("UPSTAGE_API_KEY 가 설정되지 않았습니다 (backend/.env 확인).")
+    return key
+
+
+def _client(path: str = ""):
+    from openai import OpenAI
+    return OpenAI(api_key=_api_key(), base_url=f"https://api.upstage.ai/v1{path}")
+
+
+def _real_classify(file_bytes: bytes, filename: str) -> str:
+    """document-classify 로 문서 종류를 분류한다. 카테고리는 우리가 정의한다."""
+    b64 = base64.b64encode(file_bytes).decode("utf-8")
+    resp = _client("/document-classification").chat.completions.create(
+        model="document-classify",
+        messages=[{
+            "role": "user",
+            "content": [{
+                "type": "image_url",
+                "image_url": {"url": f"data:application/octet-stream;base64,{b64}"},
+            }],
+        }],
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "document-classify",
+                "schema": {
+                    "type": "string",
+                    "oneOf": [
+                        {"const": "임대차계약서", "description": "주택·상가 전세 또는 월세 임대차 계약서"},
+                        {"const": "기타", "description": "그 외 모든 문서"},
+                    ],
+                },
+            },
+        },
+    )
+    raw = resp.choices[0].message.content
+    try:
+        label = json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        label = raw
+    return str(label).strip()
+
+
+def _real_parse(file_bytes: bytes, filename: str) -> str:
+    """document-digitization(Document Parse) 으로 전체 텍스트를 추출한다."""
+    import requests
+    resp = requests.post(
+        "https://api.upstage.ai/v1/document-digitization",
+        headers={"Authorization": f"Bearer {_api_key()}"},
+        files={"document": (filename, file_bytes)},
+        data={"ocr": "force", "model": "document-parse", "output_formats": '["markdown"]'},
+        timeout=120,
+    )
+    resp.raise_for_status()
+    content = resp.json().get("content", {})
+    return content.get("markdown") or content.get("text") or content.get("html") or ""
+
+
+def _real_extract(text: str) -> dict:
+    """파싱된 계약서 텍스트에서 summary 사실 필드를 JSON 으로 추출한다."""
+    schema = {
+        "type": "object",
+        "properties": {
+            "type": {"type": "string", "description": "계약 종류 (예: 전세 임대차 계약, 월세 임대차 계약)"},
+            "parties": {"type": "string", "description": "임대인/임차인 정보"},
+            "deposit": {"type": "string", "description": "보증금 (금액 표기)"},
+            "duration": {"type": "string", "description": "임대차 기간 (시작 ~ 종료)"},
+            "monthlyRent": {"type": "string", "description": "월세 (없으면 '없음')"},
+            "moveInDate": {"type": "string", "description": "입주일"},
+            "balanceDate": {"type": "string", "description": "잔금일"},
+            "maintenanceFee": {"type": "string", "description": "관리비"},
+            "realtor": {"type": "string", "description": "공인중개사 정보"},
+        },
+        "required": ["type", "parties", "deposit", "duration"],
+    }
+    resp = _client().chat.completions.create(
+        model="solar-pro3",
+        messages=[
+            {"role": "system", "content": "임대차계약서 텍스트에서 요약 정보를 추출해 JSON 으로만 답하라. 값을 확인할 수 없으면 '확인 필요' 로 채워라."},
+            {"role": "user", "content": text},
+        ],
+        response_format={
+            "type": "json_schema",
+            "json_schema": {"name": "summary", "schema": schema},
+        },
+    )
+    return json.loads(resp.choices[0].message.content)
+
+
+def _real_chat(messages: list[dict]) -> str:
+    """solar-pro3(reasoning) 으로 위험 판단 JSON 을 생성한다."""
+    resp = _client().chat.completions.create(
+        model="solar-pro3",
+        messages=messages,
+        reasoning_effort="high",
+        stream=False,
+    )
+    return resp.choices[0].message.content
+
+
+# ---------- 공개 인터페이스 (pipeline 이 호출) ----------
+
+def classify(file_bytes: bytes, filename: str) -> str:
+    if _fake():
+        return "임대차계약서"
+    return _real_classify(file_bytes, filename)
+
+
+def parse(file_bytes: bytes, filename: str) -> str:
+    if _fake():
+        return "전세 임대차 계약서\n보증금 일억원\n임대인 OOO 임차인 OOO\n특약사항 ..."
+    return _real_parse(file_bytes, filename)
+
+
+def extract(text: str) -> dict:
+    if _fake():
+        return _fake_summary()
+    return _real_extract(text)
+
+
+def chat(messages: list[dict]) -> str:
+    if _fake():
+        return _fake_chat_json()
+    return _real_chat(messages)

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.pipeline import analyze
 
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 app = FastAPI(title="전월세 계약서 리스크 분석 API")
 

@@ -25,6 +25,7 @@
 
   ```
   UPSTAGE_API_KEY=여기에_키_입력
+  DATA_GO_KR_KEY=b952b6edd4301ea124141c9f94e8bfa3ea5d421342b6ef3bcfe73cf876f0b7ff
   USE_FAKE_UPSTAGE=false
   ```
 

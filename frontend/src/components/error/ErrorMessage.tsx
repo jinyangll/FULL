@@ -32,7 +32,8 @@ export default function ErrorMessage({ code }: { code: string | null }) {
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-brand">
         <AlertCircle size={34} aria-hidden="true" />
       </div>
-      <h1 className="mt-6 text-2xl font-bold text-brand">{message.title}</h1>
+      <p className="mt-5 text-sm font-bold text-brand-accent">HERO 분석 안내</p>
+      <h1 className="mt-2 text-2xl font-bold text-brand">{message.title}</h1>
       <p className="mt-3 break-keep text-sm leading-6 text-brand-muted">{message.description}</p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <ButtonLink to="/" variant="primary">

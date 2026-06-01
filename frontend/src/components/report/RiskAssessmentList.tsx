@@ -13,6 +13,13 @@ const order: Record<RiskLevel, number> = {
   낮음: 4,
 };
 
+const statusClasses: Record<RiskAssessment['status'], string> = {
+  '계약서에서 확인됨': 'border-emerald-200 bg-emerald-50 text-emerald-800',
+  '외부 서류 확인 필요': 'border-blue-200 bg-blue-50 text-blue-800',
+  '조건부 해당': 'border-amber-200 bg-amber-50 text-amber-800',
+  '현재 자료만으로 판단 불가': 'border-slate-300 bg-slate-50 text-slate-700',
+};
+
 export default function RiskAssessmentList({ risks }: { risks: RiskAssessment[] }) {
   const sorted = [...risks].sort((a, b) => order[a.level] - order[b.level]);
 
@@ -33,13 +40,18 @@ export default function RiskAssessmentList({ risks }: { risks: RiskAssessment[] 
                   <p className="text-xs font-bold text-brand-accent">{risk.category}</p>
                   <h3 className="mt-1 text-lg font-bold text-brand">{risk.title}</h3>
                 </div>
-                <Badge level={risk.level} />
+                <div className="flex flex-wrap justify-end gap-2">
+                  <span className={`rounded-full border px-3 py-1 text-xs font-bold ${statusClasses[risk.status]}`}>
+                    {risk.status}
+                  </span>
+                  <Badge level={risk.level} />
+                </div>
               </div>
               <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                <InfoBlock title="현재 상태" value={risk.status} />
                 <InfoBlock title="확인해야 할 자료" value={risk.requiredDocuments.join(', ')} />
                 <InfoBlock title="계약서에서 찾은 단서" value={risk.contractClues.join(', ')} />
                 <InfoBlock title="확인 시점" value={risk.stages.join(' / ')} />
+                <InfoBlock title="분류 기준" value={risk.status} />
               </div>
               <div className="mt-4 space-y-3">
                 <InfoBlock title="왜 중요한가" value={risk.whyImportant} />

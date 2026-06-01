@@ -20,7 +20,9 @@ export default function SummaryCard({ summary }: { summary: AnalysisSummary }) {
       <Card className="space-y-5">
         <div>
           <SectionHeading title="계약 기본정보" />
-          <p className="mt-2 text-sm leading-6 text-brand-muted">분석 결과에서 추출한 핵심 계약 정보를 먼저 확인해요.</p>
+          <p className="mt-2 break-keep text-sm leading-6 text-brand-muted">
+            계약서에서 추출한 핵심 정보를 먼저 확인합니다. 비어 있는 항목은 추가 확인이 필요합니다.
+          </p>
         </div>
         <dl className="summary-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {labels.map((item) => (

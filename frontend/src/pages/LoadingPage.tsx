@@ -76,11 +76,11 @@ export default function LoadingPage() {
   }, [apiDone, currentStep, navigate]);
 
   const currentMessages = [
-    '계약서 파일이 분석 가능한 형식인지 확인하고 있어요.',
-    '전월세 계약서의 문장을 읽고 조항 단위로 정리하고 있어요.',
-    '보증금, 계약 기간, 임대인·임차인 정보를 리포트에 맞게 구조화하고 있어요.',
-    '전세가율, 권리관계, 체납, 특약 등 9가지 전월세 리스크를 점검하고 있어요.',
-    '계약 전 확인할 항목을 체크리스트형 리포트로 생성하고 있어요.',
+    '업로드 문서 유형을 확인하고 있어요.',
+    '계약서의 보증금·기간·특약을 추출하고 있어요.',
+    '계약서에서 확인 가능한 항목을 분류하고 있어요.',
+    '공적서류가 필요한 리스크를 정리하고 있어요.',
+    '전월세 사전 점검 리포트를 생성하고 있어요.',
   ];
 
   return (
@@ -90,12 +90,17 @@ export default function LoadingPage() {
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-brand-muted">
               <FileText size={14} aria-hidden="true" />
+              <span className="text-brand-accent">HERO</span>
               <span className="max-w-64 truncate">
                 {files.length === 1 ? files[0]?.name : `${files.length}개 파일`}
               </span>
             </div>
-            <h1 className="break-keep text-3xl font-bold tracking-normal text-brand">계약서를 분석하고 있어요</h1>
-            <p className="break-keep text-sm leading-6 text-brand-muted">1분 정도 걸려요. 잠시만 기다려 주세요.</p>
+            <h1 className="break-keep text-3xl font-bold tracking-normal text-brand">
+              HERO가 전월세 계약을 사전 점검하고 있어요
+            </h1>
+            <p className="break-keep text-sm leading-6 text-brand-muted">
+              계약서에서 확인할 내용과 공적서류가 필요한 항목을 나눠 정리합니다.
+            </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-brand">
             {currentStep + 1} / 5 단계

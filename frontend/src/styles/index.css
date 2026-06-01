@@ -59,6 +59,12 @@ input {
   }
 }
 
+@media (min-width: 1280px) {
+  .risk-overview {
+    grid-template-columns: repeat(5, minmax(150px, 1fr));
+  }
+}
+
 @keyframes shake {
   0%,
   100% {

@@ -52,19 +52,31 @@ export default function ReportPage() {
         </Button>
       </div>
 
-      <div id="summary" className="report-title-card print-section print-card mb-8 scroll-mt-8 rounded-3xl border border-slate-200/80 bg-white/85 p-6 shadow-card backdrop-blur sm:p-8">
-        <h1 className="text-3xl font-bold tracking-normal text-brand sm:text-4xl">전월세 계약 사전 점검 리포트</h1>
-        <p className="mt-3 break-keep text-sm leading-6 text-brand-muted">분석 일시 {analyzedAt}</p>
-        <p className="mt-1 text-sm font-bold text-brand-accent">AI 계약 검토 어시스턴트</p>
-        <p className="mt-3 break-keep text-sm leading-6 text-brand-muted">
-          계약서와 추가 확인 자료를 구분해 위험 요소를 정리했어요.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {['계약서 기반 분석', '공적서류 추가 확인 필요', '참고용 리포트'].map((badge) => (
-            <span key={badge} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-brand-muted">
-              {badge}
-            </span>
-          ))}
+      <div id="summary" className="report-title-card print-section print-card mb-8 scroll-mt-8 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-card sm:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-sm font-bold text-brand-accent">HERO 계약서·공적서류 분리 리포트</p>
+            <h1 className="mt-3 break-keep text-3xl font-bold tracking-normal text-brand sm:text-4xl">
+              전월세 계약 사전 점검 리포트
+            </h1>
+            <p className="mt-3 break-keep text-sm leading-6 text-brand-muted">
+              계약서에서 확인 가능한 항목과 등기부등본·건축물대장·세금 열람처럼 추가 확인이 필요한 항목을
+              구분해 정리했습니다.
+            </p>
+            <p className="mt-3 text-sm font-semibold text-brand-muted">분석 일시 {analyzedAt}</p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3 lg:w-[360px]">
+            {[
+              { label: '계약서 기반', value: '확인됨' },
+              { label: '공적서류', value: '추가 확인' },
+              { label: '리포트 용도', value: '참고용' },
+            ].map((item) => (
+              <div key={item.label} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-xs font-bold text-brand-muted">{item.label}</p>
+                <p className="mt-1 text-sm font-bold text-brand">{item.value}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

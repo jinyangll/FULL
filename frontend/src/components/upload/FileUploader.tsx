@@ -86,17 +86,17 @@ export default function FileUploader({ files, onChange }: FileUploaderProps) {
           type="button"
           onClick={() => inputRef.current?.click()}
           className="flex w-full flex-col items-center justify-center gap-5 rounded-xl py-10 text-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2"
-          aria-label="계약서 및 공적서류 파일 선택"
+          aria-label="계약서 파일 선택"
         >
           <span className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-brand shadow-sm">
             <UploadCloud size={30} aria-hidden="true" />
           </span>
           <span>
             <span className="block break-keep text-base font-bold text-brand">
-              계약서와 관련 공적서류를 업로드하세요
+              PDF, JPG, PNG 계약서를 업로드하세요
             </span>
             <span className="mt-2 block text-sm text-brand-muted">
-              PDF, JPG, PNG · 최대 {MAX_FILES}개 · 계약서는 필수
+              계약서는 필수 · 관련 공적서류는 함께 올릴 수 있어요 · 최대 {MAX_FILES}개
             </span>
           </span>
         </button>

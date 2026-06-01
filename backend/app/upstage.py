@@ -14,10 +14,41 @@ USE_FAKE_UPSTAGE=true 면 캔드 데이터를 반환합니다 (키 없이 데모
 import base64
 import json
 import os
+import time
 
 
 def _fake() -> bool:
     return os.getenv("USE_FAKE_UPSTAGE", "false").lower() == "true"
+
+
+class RateLimitExceeded(Exception):
+    """Upstage API rate limit(429)이 재시도 후에도 해소되지 않음."""
+
+
+_RETRY_WAITS = [2, 5]  # 429 발생 시 재시도 간 대기(초)
+
+
+def _is_rate_limit(exc: Exception) -> bool:
+    resp = getattr(exc, "response", None)
+    if resp is not None and getattr(resp, "status_code", None) == 429:
+        return True
+    return getattr(exc, "status_code", None) == 429
+
+
+def _with_retry(fn):
+    """429면 짧게 대기 후 재시도하고, 끝내 실패하면 RateLimitExceeded 로 변환한다."""
+    last = None
+    for wait in [0, *_RETRY_WAITS]:
+        if wait:
+            time.sleep(wait)
+        try:
+            return fn()
+        except Exception as exc:
+            if _is_rate_limit(exc):
+                last = exc
+                continue
+            raise
+    raise RateLimitExceeded() from last
 
 
 # ---------- Fake (데모/테스트용) ----------
@@ -33,6 +64,10 @@ def _fake_summary() -> dict:
         "balanceDate": "2024.05.31",
         "maintenanceFee": "월 80,000원, 세부 항목 추가 확인 필요",
         "realtor": "OO공인중개사무소, 중개사 OOO",
+        "address": "서울특별시 종로구 청운동 1-1",
+        "buildingName": "OO아파트",
+        "exclusiveArea": "84.97",
+        "propertyType": "아파트",
     }
 
 
@@ -88,6 +123,12 @@ def _real_classify(file_bytes: bytes, filename: str) -> str:
                     "type": "string",
                     "oneOf": [
                         {"const": "임대차계약서", "description": "주택·상가 전세 또는 월세 임대차 계약서"},
+                        {"const": "등기부등본", "description": "부동산 등기사항전부증명서"},
+                        {"const": "건축물대장", "description": "건축물대장 (일반/집합)"},
+                        {"const": "전입세대확인서", "description": "전입세대 열람 내역서"},
+                        {"const": "미납국세열람내역", "description": "미납 국세·지방세 열람 내역 또는 납세증명서"},
+                        {"const": "신탁원부", "description": "신탁원부"},
+                        {"const": "중개대상물확인서", "description": "중개대상물 확인·설명서"},
                         {"const": "기타", "description": "그 외 모든 문서"},
                     ],
                 },
@@ -131,6 +172,10 @@ def _real_extract(text: str) -> dict:
             "balanceDate": {"type": "string", "description": "잔금일"},
             "maintenanceFee": {"type": "string", "description": "관리비"},
             "realtor": {"type": "string", "description": "공인중개사 정보"},
+            "address": {"type": "string", "description": "목적물 소재지 주소 (도로명 또는 지번 전체, 없으면 '확인 필요')"},
+            "buildingName": {"type": "string", "description": "건물명/아파트명 (없으면 '없음')"},
+            "exclusiveArea": {"type": "string", "description": "전용면적 ㎡ 숫자만 (예: 84.97, 없으면 '확인 필요')"},
+            "propertyType": {"type": "string", "description": "주택 유형: 아파트/연립다세대/단독다가구/오피스텔 중 하나, 불명확하면 '확인 필요'"},
         },
         "required": ["type", "parties", "deposit", "duration"],
     }
@@ -161,25 +206,42 @@ def _real_chat(messages: list[dict]) -> str:
 
 # ---------- 공개 인터페이스 (pipeline 이 호출) ----------
 
+_FAKE_CLASSIFY_KEYWORDS = [
+    ("등기", "등기부등본"),
+    ("건축물", "건축물대장"),
+    ("전입", "전입세대확인서"),
+    ("국세", "미납국세열람내역"),
+    ("신탁", "신탁원부"),
+    ("중개", "중개대상물확인서"),
+]
+
+
+def _fake_classify(filename: str) -> str:
+    for kw, label in _FAKE_CLASSIFY_KEYWORDS:
+        if kw in filename:
+            return label
+    return "임대차계약서"
+
+
 def classify(file_bytes: bytes, filename: str) -> str:
     if _fake():
-        return "임대차계약서"
-    return _real_classify(file_bytes, filename)
+        return _fake_classify(filename)
+    return _with_retry(lambda: _real_classify(file_bytes, filename))
 
 
 def parse(file_bytes: bytes, filename: str) -> str:
     if _fake():
         return "전세 임대차 계약서\n보증금 일억원\n임대인 OOO 임차인 OOO\n특약사항 ..."
-    return _real_parse(file_bytes, filename)
+    return _with_retry(lambda: _real_parse(file_bytes, filename))
 
 
 def extract(text: str) -> dict:
     if _fake():
         return _fake_summary()
-    return _real_extract(text)
+    return _with_retry(lambda: _real_extract(text))
 
 
 def chat(messages: list[dict]) -> str:
     if _fake():
         return _fake_chat_json()
-    return _real_chat(messages)
+    return _with_retry(lambda: _real_chat(messages))

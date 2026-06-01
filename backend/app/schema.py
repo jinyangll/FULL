@@ -18,6 +18,10 @@ class AnalysisSummary(BaseModel):
     balanceDate: Optional[str] = None
     maintenanceFee: Optional[str] = None
     realtor: Optional[str] = None
+    address: Optional[str] = None
+    buildingName: Optional[str] = None
+    exclusiveArea: Optional[str] = None
+    propertyType: Optional[str] = None
 
 
 class RiskCounts(BaseModel):
@@ -41,6 +45,7 @@ class RiskAssessment(BaseModel):
     action: str
     questions: list[str]
     stages: list[CheckStage]
+    dataSource: Optional[str] = None  # 공공데이터로 검증된 항목만 출처 표기(예: "국토교통부 실거래가 N건 기준")
 
 
 class PublicDocumentCheck(BaseModel):
@@ -80,6 +85,7 @@ class AnalysisData(BaseModel):
     risks: list[Risk]
     checklist: list[str]
     questions_to_ask: list[str]
+    providedDocuments: list[str] = []
 
 
 class ErrorInfo(BaseModel):

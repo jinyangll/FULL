@@ -5,6 +5,7 @@ from app.schema import AnalysisData, RiskAssessment, RiskCounts
 from app.scaffold import (
     RISK_SCAFFOLD, PUBLIC_DOCUMENT_CHECKS, STAGE_CHECKLISTS,
     QUESTIONS_BY_TARGET, CHECKLIST, QUESTIONS_TO_ASK,
+    REALPRICE_CHECK_NAME, ANSIM_CHECK_RESOLVED,
 )
 
 _LEVEL_BUCKET = {
@@ -13,6 +14,12 @@ _LEVEL_BUCKET = {
     "낮음": "low",
     "확인 필요": "needCheck",
     "판단 불가": "unknown",
+}
+
+# 분류기 라벨 → 공적서류 점검 항목 이름. 이름이 다른 것만 보정한다(나머지는 동일).
+_PROVIDED_TO_CHECK_NAME = {
+    "미납국세열람내역": "미납 국세·지방세 열람",
+    "중개대상물확인서": "중개대상물 확인·설명서",
 }
 
 _DEFAULT_LEVEL = "확인 필요"
@@ -64,7 +71,8 @@ def count_levels(assessments: list[dict]) -> dict:
     return counts
 
 
-def build_data(summary: dict, llm: dict) -> AnalysisData:
+def build_data(summary: dict, llm: dict, provided_documents: list[str],
+               realprice_resolved: bool = False) -> AnalysisData:
     llm_assessments = llm.get("assessments", {})
     merged: list[dict] = []
     for scaf in RISK_SCAFFOLD:
@@ -85,15 +93,25 @@ def build_data(summary: dict, llm: dict) -> AnalysisData:
         })
 
     counts = count_levels(merged)
+    # 이미 업로드한 공적서류는 '추가로 확인해야 할 서류'에서 제외한다.
+    provided_check_names = {_PROVIDED_TO_CHECK_NAME.get(d, d) for d in provided_documents}
+    public_checks = [c for c in PUBLIC_DOCUMENT_CHECKS if c["name"] not in provided_check_names]
+    # 전세가율을 실거래가로 자동 확인했으면 해당 항목을 안심전세 App(보증·사고이력) 중심으로 다듬는다.
+    if realprice_resolved:
+        public_checks = [
+            ANSIM_CHECK_RESOLVED if c["name"] == REALPRICE_CHECK_NAME else c
+            for c in public_checks
+        ]
     return AnalysisData(
         summary=summary,
         riskCounts=RiskCounts(**counts),
         riskAssessments=[RiskAssessment(**m) for m in merged],
-        publicDocumentChecks=PUBLIC_DOCUMENT_CHECKS,
+        publicDocumentChecks=public_checks,
         stageChecklists=STAGE_CHECKLISTS,
         questionsByTarget=QUESTIONS_BY_TARGET,
         finalComment=llm.get("finalComment", ""),
         risks=[],
         checklist=CHECKLIST,
         questions_to_ask=QUESTIONS_TO_ASK,
+        providedDocuments=provided_documents,
     )

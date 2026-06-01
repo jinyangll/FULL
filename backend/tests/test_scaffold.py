@@ -28,3 +28,17 @@ def test_public_and_stage_constants_nonempty():
     assert len(STAGE_CHECKLISTS) == 6
     assert set(QUESTIONS_BY_TARGET.keys()) == {"landlord", "realtor", "expert"}
     assert CHECKLIST and QUESTIONS_TO_ASK
+
+
+def test_every_risk_has_detection_rule():
+    from app.scaffold import RISK_IDS, DETECTION_RULES
+    for rid in RISK_IDS:
+        assert rid in DETECTION_RULES
+        assert DETECTION_RULES[rid].strip()
+
+
+def test_doc_types_includes_contract_and_etc():
+    from app.scaffold import DOC_TYPES
+    assert "임대차계약서" in DOC_TYPES
+    assert "기타" in DOC_TYPES
+    assert "등기부등본" in DOC_TYPES

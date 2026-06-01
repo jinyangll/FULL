@@ -1,9 +1,13 @@
+import logging
 from pathlib import Path
+
 from dotenv import load_dotenv
+
+logging.basicConfig(level=logging.INFO)
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.pipeline import analyze
+from app.pipeline import analyze, InputFile
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
@@ -23,7 +27,10 @@ def health():
 
 
 @app.post("/api/analyze-contract")
-async def analyze_contract(file: UploadFile = File(...)):
-    file_bytes = await file.read()
-    result = analyze(file_bytes, file.filename or "upload", file.content_type or "")
+async def analyze_contract(files: list[UploadFile] = File(...)):
+    inputs = []
+    for f in files:
+        file_bytes = await f.read()
+        inputs.append(InputFile(file_bytes, f.filename or "upload", f.content_type or ""))
+    result = analyze(inputs)
     return result.model_dump(exclude_none=True)

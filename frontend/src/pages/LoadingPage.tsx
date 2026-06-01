@@ -4,10 +4,10 @@ import { FileText } from 'lucide-react';
 import Card from '../components/common/Card';
 import LoadingSteps from '../components/loading/LoadingSteps';
 import { useAnalyzeContract } from '../hooks/useAnalyzeContract';
-import { clearPendingFileMeta, getPendingFileMeta } from '../lib/storage';
+import { clearPendingFileMeta, getPendingFilesMeta } from '../lib/storage';
 
 interface LocationState {
-  file?: File;
+  files?: File[];
 }
 
 export default function LoadingPage() {
@@ -17,28 +17,24 @@ export default function LoadingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [apiDone, setApiDone] = useState(false);
 
-  const file = useMemo(() => {
+  const files = useMemo(() => {
     const state = location.state as LocationState | null;
-    if (state?.file) {
-      return state.file;
+    if (state?.files && state.files.length > 0) {
+      return state.files;
     }
 
-    const meta = getPendingFileMeta();
-    if (!meta) {
-      return null;
-    }
-
-    return new File([''], meta.name, { type: meta.type });
+    const metas = getPendingFilesMeta();
+    return metas.map((meta) => new File([''], meta.name, { type: meta.type }));
   }, [location.state]);
 
   useEffect(() => {
-    if (!file) {
+    if (files.length === 0) {
       navigate('/', { replace: true });
       return;
     }
 
     let isMounted = true;
-    run(file).then((result) => {
+    run(files).then((result) => {
       if (isMounted && result) {
         setApiDone(true);
       }
@@ -47,7 +43,7 @@ export default function LoadingPage() {
     return () => {
       isMounted = false;
     };
-  }, [file, navigate, run]);
+  }, [files, navigate, run]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -94,7 +90,9 @@ export default function LoadingPage() {
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-brand-muted">
               <FileText size={14} aria-hidden="true" />
-              <span className="max-w-64 truncate">{file?.name}</span>
+              <span className="max-w-64 truncate">
+                {files.length === 1 ? files[0]?.name : `${files.length}개 파일`}
+              </span>
             </div>
             <h1 className="break-keep text-3xl font-bold tracking-normal text-brand">계약서를 분석하고 있어요</h1>
             <p className="break-keep text-sm leading-6 text-brand-muted">1분 정도 걸려요. 잠시만 기다려 주세요.</p>

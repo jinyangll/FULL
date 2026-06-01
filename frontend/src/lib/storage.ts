@@ -31,26 +31,26 @@ export function clearAnalysis() {
   sessionStorage.removeItem(ANALYSIS_KEY);
 }
 
-export function savePendingFileMeta(file: File) {
-  const meta: PendingFileMeta = {
+export function savePendingFilesMeta(files: File[]) {
+  const metas: PendingFileMeta[] = files.map((file) => ({
     name: file.name,
     size: file.size,
     type: file.type,
-  };
-  sessionStorage.setItem(PENDING_FILE_KEY, JSON.stringify(meta));
+  }));
+  sessionStorage.setItem(PENDING_FILE_KEY, JSON.stringify(metas));
 }
 
-export function getPendingFileMeta(): PendingFileMeta | null {
+export function getPendingFilesMeta(): PendingFileMeta[] {
   const value = sessionStorage.getItem(PENDING_FILE_KEY);
   if (!value) {
-    return null;
+    return [];
   }
 
   try {
-    return JSON.parse(value) as PendingFileMeta;
+    return JSON.parse(value) as PendingFileMeta[];
   } catch {
     sessionStorage.removeItem(PENDING_FILE_KEY);
-    return null;
+    return [];
   }
 }
 

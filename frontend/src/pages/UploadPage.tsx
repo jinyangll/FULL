@@ -103,7 +103,7 @@ const cautionItems = [
 ];
 
 export default function UploadPage() {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const { start } = useAnalyzeContract();
 
   return (
@@ -157,7 +157,7 @@ export default function UploadPage() {
               </div>
 
               <div className="mt-6">
-                <FileUploader file={file} onChange={setFile} />
+                <FileUploader files={files} onChange={setFiles} />
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -181,11 +181,11 @@ export default function UploadPage() {
 
               <Button
                 type="button"
-                className={`mt-6 w-full py-3.5 ${file ? 'shadow-lg shadow-slate-900/15' : 'bg-slate-100 text-slate-500'}`}
-                disabled={!file}
+                className={`mt-6 w-full py-3.5 ${files.length > 0 ? 'shadow-lg shadow-slate-900/15' : 'bg-slate-100 text-slate-500'}`}
+                disabled={files.length === 0}
                 onClick={() => {
-                  if (file) {
-                    start(file);
+                  if (files.length > 0) {
+                    start(files);
                   }
                 }}
               >

@@ -20,7 +20,11 @@ const scopes = [
   },
 ];
 
-export default function AnalysisScopeCard() {
+interface AnalysisScopeCardProps {
+  providedDocuments?: string[];
+}
+
+export default function AnalysisScopeCard({ providedDocuments }: AnalysisScopeCardProps) {
   return (
     <section id="scope" className="print-section scroll-mt-8">
       <Card className="space-y-5">
@@ -31,6 +35,19 @@ export default function AnalysisScopeCard() {
             건축물대장, 전입세대확인서, 세금 열람 자료 등 외부 공적서류가 필요한 항목은 ‘추가 확인
             필요’로 표시됩니다.
           </p>
+          {providedDocuments && providedDocuments.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="text-sm font-semibold text-brand">검증에 사용된 서류:</span>
+              {providedDocuments.map((doc) => (
+                <span
+                  key={doc}
+                  className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold text-brand"
+                >
+                  {doc}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
         <div className="grid gap-4 lg:grid-cols-3">
           {scopes.map((scope) => {

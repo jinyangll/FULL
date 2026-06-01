@@ -10,7 +10,9 @@ export default function PublicDocumentCheckSection({ documents }: { documents: P
         <div>
           <SectionHeading title="추가로 확인해야 할 공적서류" />
           <p className="mt-2 break-keep text-sm leading-6 text-brand-muted">
-            현재 계약서만 업로드된 상태에서는 아래 자료를 추가 확인해야 합니다.
+            {documents.length > 0
+              ? '이미 업로드한 서류는 제외했습니다. 아래 자료를 추가로 확인하면 위험을 더 정확히 판단할 수 있습니다.'
+              : '필요한 공적서류를 모두 업로드하셨습니다. 추가로 확인할 서류가 없습니다.'}
           </p>
         </div>
         <div className="grid gap-4 lg:grid-cols-2">

@@ -43,7 +43,7 @@ export default function RiskAssessmentList({ risks }: { risks: RiskAssessment[] 
               </div>
               <div className="mt-4 space-y-3">
                 <InfoBlock title="왜 중요한가" value={risk.whyImportant} />
-                <InfoBlock title="현재 자료 기준 판단" value={risk.currentFinding} />
+                <InfoBlock title="현재 자료 기준 판단" value={risk.currentFinding} source={risk.dataSource} />
                 <InfoBlock title="지금 해야 할 확인 행동" value={risk.action} emphasis />
               </div>
               <div className="mt-4">
@@ -64,10 +64,17 @@ export default function RiskAssessmentList({ risks }: { risks: RiskAssessment[] 
   );
 }
 
-function InfoBlock({ title, value, emphasis = false }: { title: string; value: string; emphasis?: boolean }) {
+function InfoBlock({ title, value, emphasis = false, source }: { title: string; value: string; emphasis?: boolean; source?: string }) {
   return (
     <div className={`rounded-2xl border px-4 py-3 ${emphasis ? 'border-blue-100 bg-blue-50' : 'border-slate-200 bg-slate-50'}`}>
-      <p className={`text-xs font-bold ${emphasis ? 'text-brand-accent' : 'text-brand-muted'}`}>{title}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <p className={`text-xs font-bold ${emphasis ? 'text-brand-accent' : 'text-brand-muted'}`}>{title}</p>
+        {source && (
+          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+            ✓ {source}
+          </span>
+        )}
+      </div>
       <p className="mt-2 break-keep text-sm leading-6 text-brand">{value}</p>
     </div>
   );

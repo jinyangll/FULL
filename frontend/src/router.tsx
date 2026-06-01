@@ -4,7 +4,7 @@ import ErrorPage from './pages/ErrorPage';
 import LoadingPage from './pages/LoadingPage';
 import ReportPage from './pages/ReportPage';
 import UploadPage from './pages/UploadPage';
-import { getAnalysis, getPendingFileMeta } from './lib/storage';
+import { getAnalysis, getPendingFilesMeta } from './lib/storage';
 
 export const router = createBrowserRouter([
   {
@@ -15,7 +15,7 @@ export const router = createBrowserRouter([
       {
         path: 'analyzing',
         loader: () => {
-          if (!getPendingFileMeta()) {
+          if (getPendingFilesMeta().length === 0) {
             throw redirect('/');
           }
           return null;

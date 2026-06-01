@@ -46,6 +46,7 @@ export interface RiskAssessment {
   action: string;
   questions: string[];
   stages: CheckStage[];
+  dataSource?: string;
 }
 
 export interface PublicDocumentCheck {
@@ -84,6 +85,7 @@ export interface AnalysisData {
   risks: Risk[];
   checklist: string[];
   questions_to_ask: string[];
+  providedDocuments?: string[];
 }
 
 export interface AnalysisResponse {

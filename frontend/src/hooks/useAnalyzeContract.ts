@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { analyzeContract } from '../services/analyzeContract';
-import { clearAnalysis, saveAnalysis, savePendingFileMeta } from '../lib/storage';
+import { clearAnalysis, saveAnalysis, savePendingFilesMeta } from '../lib/storage';
 
 type AnalyzeStatus = 'idle' | 'uploading' | 'analyzing' | 'done' | 'error';
 
@@ -10,20 +10,20 @@ export function useAnalyzeContract() {
   const navigate = useNavigate();
 
   const start = useCallback(
-    (file: File) => {
+    (files: File[]) => {
       clearAnalysis();
-      savePendingFileMeta(file);
-      navigate('/analyzing', { state: { file } });
+      savePendingFilesMeta(files);
+      navigate('/analyzing', { state: { files } });
     },
     [navigate],
   );
 
   const run = useCallback(
-    async (file: File) => {
+    async (files: File[]) => {
       try {
         setStatus('uploading');
         setStatus('analyzing');
-        const response = await analyzeContract(file);
+        const response = await analyzeContract(files);
 
         if (response.status === 'success' && response.data) {
           saveAnalysis(response.data);

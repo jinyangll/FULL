@@ -14,6 +14,10 @@ const messages = {
     title: '지원하지 않는 형식이에요',
     description: 'PDF, JPG, PNG 파일만 업로드할 수 있어요.',
   },
+  rate_limited: {
+    title: '요청이 많아 잠시 지연되고 있어요',
+    description: '분석 요청이 한꺼번에 몰렸어요. 1~2분 후 같은 파일로 다시 시도해 주세요.',
+  },
   analysis_failed: {
     title: '분석에 실패했어요',
     description: '잠시 후 다시 시도해 주세요. 같은 문제가 반복되면 파일을 바꿔서 올려 주세요.',

@@ -69,7 +69,7 @@ export default function ReportPage() {
       </div>
 
       <ReportLayout>
-        <AnalysisScopeCard />
+        <AnalysisScopeCard providedDocuments={analysis.providedDocuments} />
         <div id="risk-summary" className="print-section scroll-mt-8">
           <RiskOverview analysis={analysis} />
         </div>

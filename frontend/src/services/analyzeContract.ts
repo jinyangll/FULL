@@ -3,7 +3,7 @@ import { mockAnalysisResult } from '../mocks/mockAnalysisResult';
 import type { AnalysisResponse } from '../types/analysis';
 
 export async function analyzeContract(files: File[]): Promise<AnalysisResponse> {
-  if (import.meta.env.VITE_USE_MOCK === 'true' || !import.meta.env.VITE_USE_MOCK) {
+  if (import.meta.env.VITE_USE_MOCK === 'true') {
     await new Promise((resolve) => {
       window.setTimeout(resolve, 1200);
     });

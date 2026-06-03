@@ -96,3 +96,17 @@ class AnalysisResponse(BaseModel):
     status: Literal["success", "error"]
     data: Optional[AnalysisData] = None
     error: Optional[ErrorInfo] = None
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class ChatRequest(BaseModel):
+    messages: list[ChatMessage]
+    context: AnalysisData
+
+
+class ChatResponse(BaseModel):
+    reply: str

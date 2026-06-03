@@ -89,6 +89,10 @@ def _fake_chat_json() -> str:
     }, ensure_ascii=False)
 
 
+def _fake_converse() -> str:
+    return "이 리포트를 기준으로 보면, 가장 먼저 확인할 항목은 전세가율입니다. (데모 응답)"
+
+
 # ---------- 실제 Upstage 호출 (_real_*) ----------
 
 def _api_key() -> str:
@@ -204,6 +208,17 @@ def _real_chat(messages: list[dict]) -> str:
     return resp.choices[0].message.content
 
 
+def _real_converse(messages: list[dict]) -> str:
+    """solar-pro3 으로 챗봇 답변을 생성한다. 속도 우선으로 reasoning_effort 를 낮춘다."""
+    resp = _client().chat.completions.create(
+        model="solar-pro3",
+        messages=messages,
+        reasoning_effort="low",
+        stream=False,
+    )
+    return resp.choices[0].message.content
+
+
 # ---------- 공개 인터페이스 (pipeline 이 호출) ----------
 
 _FAKE_CLASSIFY_KEYWORDS = [
@@ -245,3 +260,9 @@ def chat(messages: list[dict]) -> str:
     if _fake():
         return _fake_chat_json()
     return _with_retry(lambda: _real_chat(messages))
+
+
+def converse(messages: list[dict]) -> str:
+    if _fake():
+        return _fake_converse()
+    return _with_retry(lambda: _real_converse(messages))

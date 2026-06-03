@@ -1,9 +1,9 @@
 from typing import Literal, Optional
 from pydantic import BaseModel
 
-RiskLevel = Literal["고위험", "주의", "높음", "보통", "낮음", "확인 필요", "판단 불가"]
+RiskLevel = Literal["고위험", "주의", "높음", "보통", "낮음", "확인 필요"]
 VerificationStatus = Literal[
-    "계약서에서 확인됨", "외부 서류 확인 필요", "조건부 해당", "현재 자료만으로 판단 불가"
+    "계약서에서 확인됨", "외부 서류 확인 필요", "조건부 해당"
 ]
 CheckStage = Literal["물건 탐색", "계약 직전", "계약서 작성", "계약 당일", "잔금 직전", "입주 직후"]
 
@@ -29,7 +29,6 @@ class RiskCounts(BaseModel):
     medium: int
     low: int
     needCheck: int
-    unknown: int
 
 
 class RiskAssessment(BaseModel):

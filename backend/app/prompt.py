@@ -1,8 +1,8 @@
 import json
 from app.scaffold import RISK_SCAFFOLD, RISK_IDS, DETECTION_RULES
 
-_ALLOWED_LEVELS = ["높음", "주의", "낮음", "확인 필요", "판단 불가"]
-_ALLOWED_STATUS = ["계약서에서 확인됨", "외부 서류 확인 필요", "조건부 해당", "현재 자료만으로 판단 불가"]
+_ALLOWED_LEVELS = ["높음", "주의", "낮음", "확인 필요"]
+_ALLOWED_STATUS = ["계약서에서 확인됨", "외부 서류 확인 필요", "조건부 해당"]
 
 _SYSTEM = (
     "당신은 한국 전월세 임대차계약서의 위험 요소를 분석하는 보조 도구입니다. "
@@ -70,12 +70,12 @@ def build_messages(contract_text: str, summary: dict, supporting: list[tuple[str
 {_category_guide()}
 
 위 9개 카테고리 각각에 대해, 제출된 서류에서 확인되는 사실만 근거로 판단하세요.
-- 판별에 필요한 서류가 제출되지 않았으면 추측하지 말고 status="외부 서류 확인 필요", level="확인 필요"(또는 판단 불가)로 두세요.
+- 판별에 필요한 서류가 제출되지 않았으면 추측하지 말고 status="외부 서류 확인 필요", level="확인 필요"로 두세요.
 - 여러 서류를 대조해야 하는 항목(예: 임대인 신원=계약서 임대인↔등기부 갑구 소유자)은 실제 대조 결과를 currentFinding에 적으세요.
 - level 은 다음 중 하나: {_ALLOWED_LEVELS}
 - status 는 다음 중 하나: {_ALLOWED_STATUS}
 - currentFinding: 제출된 서류에서 확인된 사실에 근거한 현재 소견 (2~3문장)
-- action: 사용자가 취할 구체적 행동
+- action: 이 항목에 한해 사용자가 취할 구체적 행동. action은 해당 항목 범위로만 한정하고, "계약을 진행해도 무방하다" 같은 계약 전체에 대한 판단·권유 표현은 개별 항목에 절대 쓰지 말 것(계약 전체 판단은 finalComment에서만). 위험이 낮은 항목이면 "이 항목에 한해 추가 조치 불필요" 수준으로 적을 것.
 - questions: 임대인/중개사에게 물어볼 질문 1~3개
 
 아래 JSON 형식으로만 출력하세요. assessments 의 키는 반드시 다음 9개여야 합니다:

@@ -13,7 +13,6 @@ _LEVEL_BUCKET = {
     "주의": "medium", "보통": "medium",
     "낮음": "low",
     "확인 필요": "needCheck",
-    "판단 불가": "unknown",
 }
 
 # 분류기 라벨 → 공적서류 점검 항목 이름. 이름이 다른 것만 보정한다(나머지는 동일).
@@ -30,7 +29,7 @@ _DEFAULT_ACTION = "관련 공적 서류를 발급해 확인하세요."
 # LLM 이 enum 을 벗어난 값을 뱉을 수 있어 허용 집합으로 보정한다.
 _VALID_LEVELS = set(_LEVEL_BUCKET)
 _VALID_STATUSES = {
-    "계약서에서 확인됨", "외부 서류 확인 필요", "조건부 해당", "현재 자료만으로 판단 불가",
+    "계약서에서 확인됨", "외부 서류 확인 필요", "조건부 해당",
 }
 
 
@@ -64,11 +63,22 @@ def parse_llm_json(raw: str) -> dict:
 
 
 def count_levels(assessments: list[dict]) -> dict:
-    counts = {"high": 0, "medium": 0, "low": 0, "needCheck": 0, "unknown": 0}
+    counts = {"high": 0, "medium": 0, "low": 0, "needCheck": 0}
     for a in assessments:
-        bucket = _LEVEL_BUCKET.get(a["level"], "unknown")
+        bucket = _LEVEL_BUCKET.get(a["level"], "needCheck")
         counts[bucket] += 1
     return counts
+
+
+# 공적서류 중요도를 연결된 위험 항목의 위험도(level)에 맞춰 동적으로 매긴다.
+# 고위험/높음과 연결되면 '높음', 주의/보통/확인 필요면 '보통', 그 외(낮음·미매칭)는 '낮음'.
+def _importance_for(related_ids: list[str], level_by_id: dict[str, str]) -> str:
+    levels = [level_by_id.get(rid) for rid in related_ids]
+    if any(lv in ("고위험", "높음") for lv in levels):
+        return "높음"
+    if any(lv in ("주의", "보통", "확인 필요") for lv in levels):
+        return "보통"
+    return "낮음"
 
 
 def build_data(summary: dict, llm: dict, provided_documents: list[str],
@@ -102,6 +112,12 @@ def build_data(summary: dict, llm: dict, provided_documents: list[str],
             ANSIM_CHECK_RESOLVED if c["name"] == REALPRICE_CHECK_NAME else c
             for c in public_checks
         ]
+    # 중요도를 연결된 위험 항목의 위험도에 맞춰 다시 매긴다(원본 dict 보존을 위해 복사본 생성).
+    level_by_id = {m["id"]: m["level"] for m in merged}
+    public_checks = [
+        {**c, "importance": _importance_for(c.get("relatedRiskIds", []), level_by_id)}
+        for c in public_checks
+    ]
     return AnalysisData(
         summary=summary,
         riskCounts=RiskCounts(**counts),

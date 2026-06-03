@@ -15,7 +15,7 @@ def test_success_response_serializes_camelcase():
     )
     data = AnalysisData(
         summary=summary, riskCounts={"high": 0, "medium": 0, "low": 0,
-        "needCheck": 1, "unknown": 0}, riskAssessments=[assessment],
+        "needCheck": 1}, riskAssessments=[assessment],
         publicDocumentChecks=[], stageChecklists=[], questionsByTarget={
         "landlord": [], "realtor": [], "expert": []}, finalComment="...",
         risks=[], checklist=[], questions_to_ask=[],

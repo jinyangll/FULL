@@ -23,10 +23,16 @@ def test_parse_llm_json_raises_on_garbage():
 def test_count_levels_maps_to_buckets():
     assessments = [
         {"level": "높음"}, {"level": "주의"}, {"level": "낮음"},
-        {"level": "확인 필요"}, {"level": "판단 불가"}, {"level": "고위험"},
+        {"level": "확인 필요"}, {"level": "고위험"},
     ]
     counts = count_levels(assessments)
-    assert counts == {"high": 2, "medium": 1, "low": 1, "needCheck": 1, "unknown": 1}
+    assert counts == {"high": 2, "medium": 1, "low": 1, "needCheck": 1}
+
+
+def test_count_levels_unknown_level_falls_back_to_needcheck():
+    # 허용 외 level(과거 '판단 불가' 포함)은 '확인 필요' 버킷으로 흡수된다
+    counts = count_levels([{"level": "판단 불가"}, {"level": "이상한값"}])
+    assert counts == {"high": 0, "medium": 0, "low": 0, "needCheck": 2}
 
 
 def test_build_data_always_has_nine_categories_even_if_llm_partial():
@@ -49,7 +55,7 @@ def test_build_data_coerces_invalid_level_and_status():
     summary = {"type": "전세", "parties": "A,B", "deposit": "1억", "duration": "x"}
     llm = {"assessments": {"jeonse-price-ratio": {
         "level": "위험함",          # 허용 외 level
-        "status": "판단 불가",       # level 값을 status 칸에 잘못 넣음
+        "status": "판단 불가",       # 허용 외 status (구 enum 제거됨)
         "currentFinding": "x", "action": "y", "questions": ["q"]}},
         "finalComment": "총평"}
     data = build_data(summary, llm, [])
@@ -115,3 +121,29 @@ def test_realprice_item_intact_when_not_resolved():
     data = _basic(["임대차계약서"])
     names = [c.name for c in data.publicDocumentChecks]
     assert "실거래가 공개시스템 / 안심전세 App" in names
+
+
+def test_public_doc_importance_follows_risk_level():
+    # 공적서류 중요도는 연결된 위험 항목의 위험도에 따라 동적으로 매겨진다
+    summary = {"type": "전세", "parties": "A,B", "deposit": "1억", "duration": "x"}
+    llm = {"assessments": {
+        "jeonse-price-ratio": {"level": "높음", "status": "외부 서류 확인 필요",
+            "currentFinding": "x", "action": "y", "questions": ["q"]},
+        "building-legality": {"level": "낮음", "status": "계약서에서 확인됨",
+            "currentFinding": "x", "action": "y", "questions": ["q"]},
+    }, "finalComment": ""}
+    data = build_data(summary, llm, ["임대차계약서"])
+    by_name = {c.name: c for c in data.publicDocumentChecks}
+    # 실거래가/안심전세 → jeonse-price-ratio(높음) → 높음
+    assert by_name["실거래가 공개시스템 / 안심전세 App"].importance == "높음"
+    # 건축물대장 → building-legality(낮음) → 낮음
+    assert by_name["건축물대장"].importance == "낮음"
+    # 미제공 위험(landlord-tax-arrears)은 기본 '확인 필요' → 보통
+    assert by_name["미납 국세·지방세 열람"].importance == "보통"
+
+
+def test_public_doc_importance_not_all_high():
+    # 회귀 방지: 더 이상 모든 서류가 '높음'으로 고정되지 않는다
+    data = _basic(["임대차계약서"])  # 빈 assessments → 전부 기본 '확인 필요'
+    importances = {c.importance for c in data.publicDocumentChecks}
+    assert importances == {"보통"}  # 확인 필요 → 보통

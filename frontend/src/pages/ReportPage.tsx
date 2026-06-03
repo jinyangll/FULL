@@ -12,6 +12,7 @@ import RiskOverview from '../components/report/RiskOverview';
 import RiskAssessmentList from '../components/report/RiskAssessmentList';
 import SummaryCard from '../components/report/SummaryCard';
 import StageChecklistTimeline from '../components/report/StageChecklistTimeline';
+import ChatWidget from '../components/report/ChatWidget';
 import { getAnalysis } from '../lib/storage';
 
 const TABS = ['summary', 'detail', 'action'] as const;
@@ -117,6 +118,8 @@ export default function ReportPage() {
           </ButtonLink>
         </div>
       </ReportLayout>
+
+      <ChatWidget analysis={analysis} />
     </main>
   );
 }

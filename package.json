@@ -1,0 +1,15 @@
+{
+  "name": "jeonse-risk-checker-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:real": "concurrently -n backend,frontend -c blue,green \"npm:dev:backend:real\" \"npm:dev:frontend\"",
+    "dev:backend": "USE_FAKE_UPSTAGE=true backend/.venv/bin/uvicorn app.main:app --app-dir backend --port 8000 --reload",
+    "dev:backend:real": "USE_FAKE_UPSTAGE=false backend/.venv/bin/uvicorn app.main:app --app-dir backend --port 8000 --reload",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "test:backend": "backend/.venv/bin/pytest backend/tests"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

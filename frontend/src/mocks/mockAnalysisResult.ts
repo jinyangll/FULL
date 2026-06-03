@@ -19,8 +19,7 @@ export const mockAnalysisResult: AnalysisResponse = {
       high: 0,
       medium: 3,
       low: 1,
-      needCheck: 4,
-      unknown: 1,
+      needCheck: 5,
     },
     riskAssessments: [
       {
@@ -151,8 +150,8 @@ export const mockAnalysisResult: AnalysisResponse = {
       {
         id: 'landlord-tax-arrears',
         title: '임대인 체납',
-        level: '판단 불가',
-        status: '현재 자료만으로 판단 불가',
+        level: '확인 필요',
+        status: '외부 서류 확인 필요',
         category: '임대인 재무 리스크',
         requiredDocuments: ['미납 국세 열람', '미납 지방세 열람', '납세증명서', '임대인 동의 여부'],
         contractClues: ['임대인 정보', '체납 관련 특약', '세금 고지 관련 문구'],

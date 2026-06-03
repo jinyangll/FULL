@@ -47,6 +47,15 @@ input {
   white-space: nowrap;
 }
 
+/* 화면에서는 선택한 그룹만 표시. 인쇄 시에는 전체 그룹을 펼친다(아래 @media print). */
+.report-group {
+  display: none;
+}
+
+.report-group.active {
+  display: block;
+}
+
 @media (min-width: 640px) {
   .risk-overview {
     grid-template-columns: repeat(2, minmax(220px, 1fr));
@@ -61,7 +70,7 @@ input {
 
 @media (min-width: 1280px) {
   .risk-overview {
-    grid-template-columns: repeat(5, minmax(150px, 1fr));
+    grid-template-columns: repeat(4, minmax(150px, 1fr));
   }
 }
 
@@ -148,6 +157,11 @@ input {
 
   .print-report .report-content {
     gap: 0 !important;
+  }
+
+  /* 화면에서 숨겨진 그룹도 PDF에는 전부 출력한다. */
+  .print-report .report-group {
+    display: block !important;
   }
 
   .print-section {

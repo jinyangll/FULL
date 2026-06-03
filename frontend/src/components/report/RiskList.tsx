@@ -9,8 +9,7 @@ const order: Record<RiskLevel, number> = {
   주의: 1,
   보통: 1,
   '확인 필요': 2,
-  '판단 불가': 3,
-  낮음: 4,
+  낮음: 3,
 };
 
 export default function RiskList({ risks }: { risks: Risk[] }) {

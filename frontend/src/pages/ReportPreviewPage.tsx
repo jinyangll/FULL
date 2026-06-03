@@ -10,7 +10,7 @@ const reportSections = [
   },
   {
     title: '위험도 요약',
-    description: '고위험, 주의, 확인 필요, 판단 불가, 낮음 상태를 한눈에 비교합니다.',
+    description: '고위험, 주의, 확인 필요, 낮음 상태를 한눈에 비교합니다.',
   },
   {
     title: '계약 기본정보',

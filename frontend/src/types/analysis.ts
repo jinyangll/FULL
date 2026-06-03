@@ -1,10 +1,9 @@
-export type RiskLevel = '고위험' | '주의' | '높음' | '보통' | '낮음' | '확인 필요' | '판단 불가';
+export type RiskLevel = '고위험' | '주의' | '높음' | '보통' | '낮음' | '확인 필요';
 
 export type VerificationStatus =
   | '계약서에서 확인됨'
   | '외부 서류 확인 필요'
-  | '조건부 해당'
-  | '현재 자료만으로 판단 불가';
+  | '조건부 해당';
 
 export type CheckStage = '물건 탐색' | '계약 직전' | '계약서 작성' | '계약 당일' | '잔금 직전' | '입주 직후';
 
@@ -75,7 +74,6 @@ export interface AnalysisData {
     medium: number;
     low: number;
     needCheck: number;
-    unknown: number;
   };
   riskAssessments?: RiskAssessment[];
   publicDocumentChecks?: PublicDocumentCheck[];

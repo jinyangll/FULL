@@ -19,7 +19,7 @@ const reportRiskStats = [
 const reportResultStats = [
   { label: '계약서에서 확인됨', value: '8건', className: 'bg-emerald-50 text-emerald-700' },
   { label: '외부 서류 확인 필요', value: '6건', className: 'bg-orange-50 text-orange-700' },
-  { label: '판단 불가', value: '2건', className: 'bg-slate-100 text-slate-700' },
+  { label: '조건부 해당', value: '2건', className: 'bg-amber-50 text-amber-700' },
 ];
 
 export default function HeroMockup() {

@@ -19,7 +19,7 @@ const processSteps = [
   },
   {
     title: '리스크 분류',
-    description: '계약서에서 확인됨, 외부 서류 확인 필요, 조건부 해당, 현재 자료만으로 판단 불가로 나눕니다.',
+    description: '계약서에서 확인됨, 외부 서류 확인 필요, 조건부 해당으로 나눕니다.',
     icon: ListChecks,
   },
   {

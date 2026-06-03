@@ -16,9 +16,9 @@ const previewRows = [
   {
     title: '임대인 체납 여부',
     source: '미납 국세·지방세 열람',
-    status: '현재 자료만으로 판단 불가',
+    status: '외부 서류 확인 필요',
     action: '열람 동의 또는 증빙 요청',
-    tone: 'border-slate-300 bg-slate-50 text-slate-700',
+    tone: 'border-blue-200 bg-blue-50 text-blue-800',
   },
 ];
 
@@ -36,12 +36,11 @@ export default function ReportPreviewMock() {
         </p>
       </div>
       <div className="space-y-5 p-5 sm:p-6">
-        <div className="grid gap-3 sm:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-4">
           {[
             { label: '고위험', count: '2건', className: 'bg-red-50 text-red-800' },
             { label: '주의', count: '3건', className: 'bg-amber-50 text-amber-800' },
             { label: '확인 필요', count: '6건', className: 'bg-blue-50 text-blue-800' },
-            { label: '판단 불가', count: '2건', className: 'bg-slate-100 text-slate-700' },
             { label: '낮음', count: '1건', className: 'bg-emerald-50 text-emerald-800' },
           ].map((item) => (
             <div key={item.label} className={`rounded-xl p-4 ${item.className}`}>

@@ -9,15 +9,13 @@ const order: Record<RiskLevel, number> = {
   주의: 1,
   보통: 1,
   '확인 필요': 2,
-  '판단 불가': 3,
-  낮음: 4,
+  낮음: 3,
 };
 
 const statusClasses: Record<RiskAssessment['status'], string> = {
   '계약서에서 확인됨': 'border-emerald-200 bg-emerald-50 text-emerald-800',
   '외부 서류 확인 필요': 'border-blue-200 bg-blue-50 text-blue-800',
   '조건부 해당': 'border-amber-200 bg-amber-50 text-amber-800',
-  '현재 자료만으로 판단 불가': 'border-slate-300 bg-slate-50 text-slate-700',
 };
 
 export default function RiskAssessmentList({ risks }: { risks: RiskAssessment[] }) {

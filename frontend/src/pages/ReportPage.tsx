@@ -1,5 +1,5 @@
 import { ArrowLeft, Printer } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { Button, ButtonLink } from '../components/common/Button';
 import AnalysisScopeCard from '../components/report/AnalysisScopeCard';
 import DisclaimerBox from '../components/report/DisclaimerBox';
@@ -14,12 +14,21 @@ import SummaryCard from '../components/report/SummaryCard';
 import StageChecklistTimeline from '../components/report/StageChecklistTimeline';
 import { getAnalysis } from '../lib/storage';
 
+const TABS = ['summary', 'detail', 'action'] as const;
+type ReportTab = (typeof TABS)[number];
+
 export default function ReportPage() {
   const analysis = getAnalysis();
+  const [searchParams] = useSearchParams();
 
   if (!analysis) {
     return <Navigate to="/" replace />;
   }
+
+  const tabParam = searchParams.get('tab');
+  const activeTab: ReportTab = TABS.includes(tabParam as ReportTab) ? (tabParam as ReportTab) : 'summary';
+  const groupClass = (tab: ReportTab) =>
+    `report-group space-y-8${activeTab === tab ? ' active' : ''}`;
 
   const analyzedAt = new Intl.DateTimeFormat('ko-KR', {
     dateStyle: 'medium',
@@ -81,19 +90,28 @@ export default function ReportPage() {
       </div>
 
       <ReportLayout>
-        <AnalysisScopeCard providedDocuments={analysis.providedDocuments} />
-        <div id="risk-summary" className="print-section scroll-mt-8">
-          <RiskOverview analysis={analysis} />
+        <div className={groupClass('summary')} data-group="summary">
+          {analysis.finalComment ? <FinalCommentBox comment={analysis.finalComment} /> : null}
+          <div id="risk-summary" className="print-section scroll-mt-8">
+            <RiskOverview analysis={analysis} />
+          </div>
+          <AnalysisScopeCard providedDocuments={analysis.providedDocuments} />
         </div>
-        <SummaryCard summary={analysis.summary} />
-        {analysis.riskAssessments ? <RiskAssessmentList risks={analysis.riskAssessments} /> : null}
-        {analysis.publicDocumentChecks ? <PublicDocumentCheckSection documents={analysis.publicDocumentChecks} /> : null}
-        {analysis.stageChecklists ? <StageChecklistTimeline stages={analysis.stageChecklists} /> : null}
-        <Checklist items={analysis.checklist} />
-        {analysis.questionsByTarget ? <QuestionsByTargetSection questions={analysis.questionsByTarget} /> : null}
-        {analysis.finalComment ? <FinalCommentBox comment={analysis.finalComment} /> : null}
-        <DisclaimerBox />
-        <div className="print-hidden flex justify-center pt-2">
+
+        <div className={groupClass('detail')} data-group="detail">
+          <SummaryCard summary={analysis.summary} />
+          {analysis.riskAssessments ? <RiskAssessmentList risks={analysis.riskAssessments} /> : null}
+          {analysis.publicDocumentChecks ? <PublicDocumentCheckSection documents={analysis.publicDocumentChecks} /> : null}
+        </div>
+
+        <div className={groupClass('action')} data-group="action">
+          {analysis.stageChecklists ? <StageChecklistTimeline stages={analysis.stageChecklists} /> : null}
+          <Checklist items={analysis.checklist} />
+          {analysis.questionsByTarget ? <QuestionsByTargetSection questions={analysis.questionsByTarget} /> : null}
+          <DisclaimerBox />
+        </div>
+
+        <div className="print-hidden mt-8 flex justify-center">
           <ButtonLink to="/" variant="primary">
             다른 계약서 분석하기
           </ButtonLink>

@@ -1,8 +1,8 @@
-import { AlertTriangle, CircleAlert, FileSearch, HelpCircle, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, CircleAlert, FileSearch, ShieldCheck } from 'lucide-react';
 import type { AnalysisData } from '../../types/analysis';
 
 const overview: Array<{
-  countKey: 'high' | 'medium' | 'low' | 'needCheck' | 'unknown';
+  countKey: 'high' | 'medium' | 'low' | 'needCheck';
   label: string;
   description: string;
   className: string;
@@ -34,14 +34,6 @@ const overview: Array<{
     icon: FileSearch,
   },
   {
-    countKey: 'unknown',
-    label: '판단 불가',
-    description: '현재 자료 부족',
-    className: 'border-slate-300 bg-slate-50 text-slate-700',
-    iconBoxClassName: 'bg-white text-slate-700',
-    icon: HelpCircle,
-  },
-  {
     countKey: 'low',
     label: '낮음',
     description: '기본 확인 후 유지',
@@ -57,7 +49,6 @@ export default function RiskOverview({ analysis }: { analysis: AnalysisData }) {
     medium: analysis.risks.filter((risk) => risk.level === '보통' || risk.level === '주의').length,
     low: analysis.risks.filter((risk) => risk.level === '낮음').length,
     needCheck: analysis.risks.filter((risk) => risk.level === '확인 필요').length,
-    unknown: analysis.risks.filter((risk) => risk.level === '판단 불가').length,
   };
   const counts = analysis.riskCounts ?? fallbackCounts;
 

@@ -95,3 +95,18 @@ def test_fake_summary_has_realprice_fields(monkeypatch):
     summary = upstage.extract("계약서 텍스트")
     for key in ("address", "buildingName", "exclusiveArea", "propertyType"):
         assert key in summary
+
+
+def test_converse_fake_returns_string(monkeypatch):
+    monkeypatch.setenv("USE_FAKE_UPSTAGE", "true")
+    reply = upstage.converse([{"role": "user", "content": "가장 위험한 항목이 뭐예요?"}])
+    assert isinstance(reply, str)
+    assert len(reply) > 0
+
+
+def test_converse_real_requires_api_key(monkeypatch):
+    import pytest
+    monkeypatch.setenv("USE_FAKE_UPSTAGE", "false")
+    monkeypatch.delenv("UPSTAGE_API_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="UPSTAGE_API_KEY"):
+        upstage.converse([{"role": "user", "content": "hi"}])

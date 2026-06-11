@@ -1,6 +1,4 @@
 """주소 문자열 → 법정동코드(시군구 5자리) 매칭."""
-from __future__ import annotations
-
 import csv
 import logging
 import os

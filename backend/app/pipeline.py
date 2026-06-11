@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 from dataclasses import dataclass
 
@@ -35,7 +33,8 @@ def _error(code: str) -> AnalysisResponse:
     return AnalysisResponse(status="error", error=ErrorInfo(code=code, message=_MESSAGES[code]))
 
 
-def analyze(files: list[InputFile]) -> AnalysisResponse:
+def validate(files: list[InputFile]) -> AnalysisResponse | None:
+    """업로드 자체의 문제는 잡 시작 전에 동기로 걸러낸다. 문제 없으면 None."""
     if not files:
         return _error("no_files")
     if len(files) > _MAX_FILES:
@@ -43,7 +42,25 @@ def analyze(files: list[InputFile]) -> AnalysisResponse:
     for f in files:
         if f.content_type not in _ALLOWED_TYPES:
             return _error("unsupported_format")
+    return None
+
+
+def analyze(files: list[InputFile], on_progress=None) -> AnalysisResponse:
+    err = validate(files)
+    if err is not None:
+        return err
+
+    def _step(i: int) -> None:
+        """진행 단계 보고(0~4). 콜백 실패가 분석을 막지 않도록 예외를 흡수한다."""
+        if on_progress is None:
+            return
+        try:
+            on_progress(i)
+        except Exception:
+            logger.exception("progress 콜백 실패(무시)")
+
     try:
+        _step(0)
         # 분류는 저렴하므로 먼저 전부 수행하고, OCR(parse)은 계약서 확정 후 필요한 것만 호출한다.
         doc_types = [upstage.classify(f.file_bytes, f.filename) for f in files]
 
@@ -52,6 +69,7 @@ def analyze(files: list[InputFile]) -> AnalysisResponse:
         )
         if contract_idx is None:
             return _error("not_contract")
+        _step(1)
         contract_text = upstage.parse(
             files[contract_idx].file_bytes, files[contract_idx].filename
         )
@@ -69,11 +87,14 @@ def analyze(files: list[InputFile]) -> AnalysisResponse:
         summary = upstage.extract(contract_text)
         # 실거래가를 chat 이전에 조회해, 그 결과를 LLM 프롬프트에 확정 사실로 주입한다.
         # (총평이 전세가율 판정과 모순되지 않도록. 추가 LLM 호출은 없고 순서만 바꾼다.)
+        _step(2)
         jeonse = compute_jeonse_ratio(summary, supporting)
         landlord = compute_blacklist_match(supporting)
         messages = build_messages(contract_text, summary, supporting, jeonse, landlord)
+        _step(3)
         raw = upstage.chat(messages)
         llm = parse_llm_json(raw)
+        _step(4)
         provided = ["임대차계약서"] + [dt for dt, _ in supporting]
         data = build_data(summary, llm, provided, realprice_resolved=jeonse is not None)
         if jeonse is not None:

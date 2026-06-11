@@ -176,7 +176,7 @@ def _real_extract(text: str) -> dict:
             "balanceDate": {"type": "string", "description": "잔금일"},
             "maintenanceFee": {"type": "string", "description": "관리비"},
             "realtor": {"type": "string", "description": "공인중개사 정보"},
-            "address": {"type": "string", "description": "목적물 소재지 주소 (도로명 또는 지번 전체, 없으면 '확인 필요')"},
+            "address": {"type": "string", "description": "임대차 목적물(주택)의 소재지 주소. [부동산의 표시]·[목적물] 항목의 소재지이며, 임대인·임차인 등 계약 당사자의 주소가 아니다. 도로명 또는 지번 전체(건물명·동·호 포함), 없으면 '확인 필요'"},
             "buildingName": {"type": "string", "description": "건물명/아파트명 (없으면 '없음')"},
             "exclusiveArea": {"type": "string", "description": "전용면적 ㎡ 숫자만 (예: 84.97, 없으면 '확인 필요')"},
             "propertyType": {"type": "string", "description": "주택 유형: 아파트/연립다세대/단독다가구/오피스텔 중 하나, 불명확하면 '확인 필요'"},

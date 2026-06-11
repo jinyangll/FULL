@@ -37,6 +37,13 @@ def _coerce(value, allowed: set, default: str) -> str:
     return value if value in allowed else default
 
 
+def _clean_evidence(value) -> list[str]:
+    """LLM evidence 를 문자열 리스트로 보정한다(최대 3개, 빈 문자열 제거)."""
+    if not isinstance(value, list):
+        return []
+    return [str(v).strip() for v in value if str(v).strip()][:3]
+
+
 def is_contract(doc_type: str) -> bool:
     return "임대차" in doc_type or "전월세" in doc_type or "임대차계약서" in doc_type
 
@@ -98,6 +105,7 @@ def build_data(summary: dict, llm: dict, provided_documents: list[str],
             "level": _coerce(var.get("level"), _VALID_LEVELS, _DEFAULT_LEVEL),
             "status": _coerce(var.get("status"), _VALID_STATUSES, _DEFAULT_STATUS),
             "currentFinding": var.get("currentFinding", _DEFAULT_FINDING),
+            "evidence": _clean_evidence(var.get("evidence")),
             "action": var.get("action", _DEFAULT_ACTION),
             "questions": var.get("questions") or scaf["questions"],
         })

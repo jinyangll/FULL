@@ -4,11 +4,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO)
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.pipeline import analyze, InputFile
-from app import chat as chat_module, upstage
+from app.pipeline import validate, InputFile
+from app import chat as chat_module, jobs, upstage
 from app.schema import ChatRequest, ChatResponse
 
 load_dotenv(Path(__file__).parent.parent / ".env")
@@ -34,8 +34,21 @@ async def analyze_contract(files: list[UploadFile] = File(...)):
     for f in files:
         file_bytes = await f.read()
         inputs.append(InputFile(file_bytes, f.filename or "upload", f.content_type or ""))
-    result = analyze(inputs)
-    return result.model_dump(exclude_none=True)
+    # 업로드 자체의 문제(형식·개수)는 잡을 만들지 않고 즉시 동기 에러로 응답한다.
+    err = validate(inputs)
+    if err is not None:
+        return err.model_dump(exclude_none=True)
+    return {"jobId": jobs.start(inputs)}
+
+
+@app.get("/api/analyze-status/{job_id}")
+def analyze_status(job_id: str):
+    job = jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="존재하지 않거나 만료된 분석입니다.")
+    if job["status"] == "done":
+        return {"status": "done", "result": job["result"]}
+    return {"status": "running", "step": job["step"]}
 
 
 @app.post("/api/chat")

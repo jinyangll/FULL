@@ -1,15 +1,33 @@
 import io
+import time
+
 from fastapi.testclient import TestClient
 from app.main import app
 
 client = TestClient(app)
 
 
+def _poll(job_id: str, timeout: float = 10.0) -> dict:
+    """잡이 done 이 될 때까지 폴링해 result 를 반환한다."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        res = client.get(f"/api/analyze-status/{job_id}")
+        assert res.status_code == 200
+        body = res.json()
+        if body["status"] == "done":
+            return body["result"]
+        assert body["status"] == "running"
+        assert isinstance(body["step"], int)
+        time.sleep(0.05)
+    raise AssertionError("잡이 제한 시간 안에 끝나지 않았습니다")
+
+
 def test_analyze_contract_success_pdf():
     files = [("files", ("contract.pdf", io.BytesIO(b"%PDF-1.4 fake"), "application/pdf"))]
     res = client.post("/api/analyze-contract", files=files)
     assert res.status_code == 200
-    body = res.json()
+    job_id = res.json()["jobId"]
+    body = _poll(job_id)
     assert body["status"] == "success"
     assert len(body["data"]["riskAssessments"]) == 9
 
@@ -21,9 +39,24 @@ def test_analyze_contract_bundle():
     ]
     res = client.post("/api/analyze-contract", files=files)
     assert res.status_code == 200
-    body = res.json()
+    body = _poll(res.json()["jobId"])
     assert body["status"] == "success"
     assert "등기부등본" in body["data"]["providedDocuments"]
+
+
+def test_analyze_status_unknown_job_returns_404():
+    res = client.get("/api/analyze-status/no-such-job")
+    assert res.status_code == 404
+
+
+def test_analyze_status_result_is_destroyed_after_first_read():
+    files = [("files", ("contract.pdf", io.BytesIO(b"%PDF-1.4 once"), "application/pdf"))]
+    job_id = client.post("/api/analyze-contract", files=files).json()["jobId"]
+    body = _poll(job_id)
+    assert body["status"] == "success"
+    # 서버 무저장 원칙: 결과는 첫 전달 즉시 파기되므로 재조회는 404
+    res = client.get(f"/api/analyze-status/{job_id}")
+    assert res.status_code == 404
 
 
 def test_analyze_contract_unsupported_format():

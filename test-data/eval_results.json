@@ -1,0 +1,234 @@
+[
+  {
+    "dir": "demo/01_안전",
+    "triggers": [],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "낮음",
+      "trust-registration": "낮음",
+      "multi-family-collateral": "낮음",
+      "building-legality": "낮음",
+      "landlord-tax-arrears": "낮음",
+      "landlord-identity": "확인 필요",
+      "post-balance-right-change": "낮음",
+      "multi-home-landlord": "낮음",
+      "special-clause-risk": "낮음"
+    },
+    "seconds": 79
+  },
+  {
+    "dir": "demo/02_위험다발",
+    "triggers": [
+      "jeonse-price-ratio",
+      "trust-registration",
+      "building-legality",
+      "landlord-tax-arrears",
+      "landlord-identity",
+      "post-balance-right-change",
+      "multi-family-collateral"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "높음",
+      "trust-registration": "높음",
+      "multi-family-collateral": "높음",
+      "building-legality": "높음",
+      "landlord-tax-arrears": "높음",
+      "landlord-identity": "높음",
+      "post-balance-right-change": "주의",
+      "multi-home-landlord": "낮음",
+      "special-clause-risk": "주의"
+    },
+    "seconds": 123
+  },
+  {
+    "dir": "demo/03_엣지",
+    "triggers": [
+      "jeonse-price-ratio"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "주의",
+      "trust-registration": "낮음",
+      "multi-family-collateral": "낮음",
+      "building-legality": "확인 필요",
+      "landlord-tax-arrears": "확인 필요",
+      "landlord-identity": "확인 필요",
+      "post-balance-right-change": "낮음",
+      "multi-home-landlord": "확인 필요",
+      "special-clause-risk": "낮음"
+    },
+    "seconds": 63
+  },
+  {
+    "dir": "risk/01_전세가율과다",
+    "triggers": [
+      "jeonse-price-ratio"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "높음",
+      "trust-registration": "확인 필요",
+      "multi-family-collateral": "낮음",
+      "building-legality": "확인 필요",
+      "landlord-tax-arrears": "확인 필요",
+      "landlord-identity": "확인 필요",
+      "post-balance-right-change": "낮음",
+      "multi-home-landlord": "확인 필요",
+      "special-clause-risk": "낮음"
+    },
+    "seconds": 41
+  },
+  {
+    "dir": "risk/02_신탁등기",
+    "triggers": [
+      "trust-registration"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "낮음",
+      "trust-registration": "높음",
+      "multi-family-collateral": "낮음",
+      "building-legality": "확인 필요",
+      "landlord-tax-arrears": "확인 필요",
+      "landlord-identity": "확인 필요",
+      "post-balance-right-change": "낮음",
+      "multi-home-landlord": "확인 필요",
+      "special-clause-risk": "낮음"
+    },
+    "seconds": 62
+  },
+  {
+    "dir": "risk/03_다가구공동담보",
+    "triggers": [
+      "multi-family-collateral"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "확인 필요",
+      "trust-registration": "확인 필요",
+      "multi-family-collateral": "주의",
+      "building-legality": "확인 필요",
+      "landlord-tax-arrears": "확인 필요",
+      "landlord-identity": "확인 필요",
+      "post-balance-right-change": "낮음",
+      "multi-home-landlord": "확인 필요",
+      "special-clause-risk": "낮음"
+    },
+    "seconds": 65
+  },
+  {
+    "dir": "risk/04_건축물적법성",
+    "triggers": [
+      "building-legality"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "낮음",
+      "trust-registration": "확인 필요",
+      "multi-family-collateral": "낮음",
+      "building-legality": "주의",
+      "landlord-tax-arrears": "확인 필요",
+      "landlord-identity": "확인 필요",
+      "post-balance-right-change": "낮음",
+      "multi-home-landlord": "확인 필요",
+      "special-clause-risk": "낮음"
+    },
+    "seconds": 49
+  },
+  {
+    "dir": "risk/05_임대인체납",
+    "triggers": [
+      "landlord-tax-arrears"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "낮음",
+      "trust-registration": "확인 필요",
+      "multi-family-collateral": "낮음",
+      "building-legality": "확인 필요",
+      "landlord-tax-arrears": "높음",
+      "landlord-identity": "확인 필요",
+      "post-balance-right-change": "낮음",
+      "multi-home-landlord": "확인 필요",
+      "special-clause-risk": "낮음"
+    },
+    "seconds": 60
+  },
+  {
+    "dir": "risk/06_임대인신원불일치",
+    "triggers": [
+      "landlord-identity"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "낮음",
+      "trust-registration": "낮음",
+      "multi-family-collateral": "낮음",
+      "building-legality": "확인 필요",
+      "landlord-tax-arrears": "확인 필요",
+      "landlord-identity": "높음",
+      "post-balance-right-change": "낮음",
+      "multi-home-landlord": "확인 필요",
+      "special-clause-risk": "낮음"
+    },
+    "seconds": 51
+  },
+  {
+    "dir": "risk/07_잔금후권리변동",
+    "triggers": [
+      "post-balance-right-change"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "낮음",
+      "trust-registration": "확인 필요",
+      "multi-family-collateral": "낮음",
+      "building-legality": "확인 필요",
+      "landlord-tax-arrears": "확인 필요",
+      "landlord-identity": "확인 필요",
+      "post-balance-right-change": "주의",
+      "multi-home-landlord": "확인 필요",
+      "special-clause-risk": "낮음"
+    },
+    "seconds": 56
+  },
+  {
+    "dir": "risk/08_악성임대인",
+    "triggers": [
+      "multi-home-landlord"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "낮음",
+      "trust-registration": "낮음",
+      "multi-family-collateral": "낮음",
+      "building-legality": "확인 필요",
+      "landlord-tax-arrears": "확인 필요",
+      "landlord-identity": "확인 필요",
+      "post-balance-right-change": "낮음",
+      "multi-home-landlord": "높음",
+      "special-clause-risk": "낮음"
+    },
+    "seconds": 77
+  },
+  {
+    "dir": "risk/09_특약독소조항",
+    "triggers": [
+      "special-clause-risk"
+    ],
+    "error": null,
+    "levels": {
+      "jeonse-price-ratio": "낮음",
+      "trust-registration": "확인 필요",
+      "multi-family-collateral": "낮음",
+      "building-legality": "확인 필요",
+      "landlord-tax-arrears": "확인 필요",
+      "landlord-identity": "확인 필요",
+      "post-balance-right-change": "주의",
+      "multi-home-landlord": "확인 필요",
+      "special-clause-risk": "높음"
+    },
+    "seconds": 42
+  }
+]

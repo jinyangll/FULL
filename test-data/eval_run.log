@@ -1,0 +1,16 @@
+12개 시나리오 평가 시작 (workers=2)
+analyze() rate limit(429)
+  [demo/01_안전] 31s rate_limited: 현재 분석 요청이 많아 처리가 지연되고 있습니다. 잠시 후 다시 시도해 주세요.
+  [demo/02_위험다발] 110s ok
+  [demo/03_엣지] 66s ok
+  [risk/01_전세가율과다] 36s ok
+  [risk/02_신탁등기] 65s ok
+  [risk/03_다가구공동담보] 59s ok
+  [risk/04_건축물적법성] 55s ok
+  [risk/05_임대인체납] 53s ok
+  [risk/06_임대인신원불일치] 62s ok
+  [risk/07_잔금후권리변동] 34s ok
+  [risk/08_악성임대인] 41s ok
+  [risk/09_특약독소조항] 44s ok
+
+완료 → /home/kangsinu/FULL/test-data/eval_report.md

@@ -3,6 +3,7 @@
 USE_FAKE_BLACKLIST=true 면 캔드 명단을 사용한다(스냅샷 파일 없이 개발/테스트).
 순수 파싱/대조 로직만 두고, 명단 수집은 scripts/crawl_blacklist.py 가 담당한다.
 """
+from __future__ import annotations
 import csv
 import logging
 import os

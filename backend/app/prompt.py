@@ -1,3 +1,4 @@
+from __future__ import annotations
 import json
 from app.scaffold import RISK_SCAFFOLD, RISK_IDS, DETECTION_RULES
 

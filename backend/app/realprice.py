@@ -2,6 +2,7 @@
 
 USE_FAKE_REALPRICE=true 면 캔드 시세를 반환한다(키 없이 개발/테스트).
 """
+from __future__ import annotations
 import logging
 import os
 import re

@@ -54,6 +54,21 @@ export default function RiskAssessmentList({ risks }: { risks: RiskAssessment[] 
               <div className="mt-4 space-y-3">
                 <InfoBlock title="왜 중요한가" value={risk.whyImportant} />
                 <InfoBlock title="현재 자료 기준 판단" value={risk.currentFinding} source={risk.dataSource} />
+                {risk.evidence && risk.evidence.length > 0 ? (
+                  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                    <p className="text-xs font-bold text-brand-muted">판단 근거 원문</p>
+                    <ul className="mt-2 space-y-2">
+                      {risk.evidence.map((quote) => (
+                        <li
+                          key={quote}
+                          className="break-keep border-l-4 border-slate-300 bg-slate-50 px-3 py-2 text-sm italic leading-6 text-brand"
+                        >
+                          “{quote}”
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 <InfoBlock title="지금 해야 할 확인 행동" value={risk.action} emphasis />
               </div>
               <div className="mt-4">

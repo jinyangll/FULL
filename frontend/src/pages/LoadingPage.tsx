@@ -34,7 +34,11 @@ export default function LoadingPage() {
     }
 
     let isMounted = true;
-    run(files).then((result) => {
+    run(files, (step) => {
+      if (isMounted) {
+        setCurrentStep((prev) => Math.max(prev, Math.min(step, 4)));
+      }
+    }).then((result) => {
       if (isMounted && result) {
         setApiDone(true);
       }
@@ -44,16 +48,6 @@ export default function LoadingPage() {
       isMounted = false;
     };
   }, [files, navigate, run]);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setCurrentStep((step) => Math.min(step + 1, 4));
-    }, 1500);
-
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, []);
 
   useEffect(() => {
     if (!apiDone) {

@@ -17,7 +17,7 @@ app = FastAPI(title="전월세 계약서 리스크 분석 API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "https://main.d2skiw5hvuy83a.amplifyapp.com"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -149,6 +149,10 @@ export default function UploadPage() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card sm:p-6">
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
+              <ShieldCheck size={14} aria-hidden="true" />
+              서버 무저장 · 분석 결과는 전달 즉시 파기됩니다
+            </p>
             <FileUploader files={files} onChange={setFiles} />
             <Button
               type="button"
@@ -164,7 +168,7 @@ export default function UploadPage() {
               <ArrowRight size={18} aria-hidden="true" />
             </Button>
             <p className="mt-4 break-keep text-center text-xs leading-5 text-brand-muted">
-              업로드한 파일은 분석 흐름에서만 사용되며, 결과는 계약 전 참고용으로 제공됩니다.
+              업로드한 파일과 분석 결과는 서버에 저장하지 않으며, 결과는 계약 전 참고용으로 제공됩니다.
             </p>
           </div>
         </div>

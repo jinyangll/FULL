@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import json
 from app.scaffold import RISK_SCAFFOLD, RISK_IDS, DETECTION_RULES
 
@@ -77,15 +76,17 @@ def build_messages(contract_text: str, summary: dict, supporting: list[tuple[str
 - level 은 다음 중 하나: {_ALLOWED_LEVELS}
 - status 는 다음 중 하나: {_ALLOWED_STATUS}
 - currentFinding: 제출된 서류에서 확인된 사실에 근거한 현재 소견 (2~3문장)
+- evidence: 판단의 근거가 된 계약서·공적서류의 원문 구절을 그대로 인용한 배열(0~3개, 각 80자 이내). 반드시 위 [계약서 본문] 또는 [함께 제출된 공적서류] 블록에 실제로 존재하는 구절만 담고, 서류에 없는 문장을 만들어 넣지 말 것. 요약 정보, 자동조회 결과 문장, 당신의 판단·요약 문장(예: "계약서 잔금일 미기재")은 원문이 아니므로 evidence에 넣지 말고 currentFinding에 서술할 것. 근거 구절이 없거나 서류 미제출이면 빈 배열 [].
 - action: 이 항목에 한해 사용자가 취할 구체적 행동. action은 해당 항목 범위로만 한정하고, "계약을 진행해도 무방하다" 같은 계약 전체에 대한 판단·권유 표현은 개별 항목에 절대 쓰지 말 것(계약 전체 판단은 finalComment에서만). 위험이 낮은 항목이면 "이 항목에 한해 추가 조치 불필요" 수준으로 적을 것.
 - questions: 임대인/중개사에게 물어볼 질문 1~3개
+- finalComment 를 포함한 모든 서술에서 금액은 "4억 2,000만원", "1억 3,200만원"처럼 억·만원 단위로 표기할 것 ("132백만원" 같은 백만원 단위 표기 금지)
 
 아래 JSON 형식으로만 출력하세요. assessments 의 키는 반드시 다음 9개여야 합니다:
 {RISK_IDS}
 
 {{
   "assessments": {{
-    "<category_id>": {{ "level": "...", "status": "...", "currentFinding": "...", "action": "...", "questions": ["..."] }}
+    "<category_id>": {{ "level": "...", "status": "...", "currentFinding": "...", "evidence": ["원문 인용"], "action": "...", "questions": ["..."] }}
   }},
   "finalComment": "전체 계약에 대한 2~4문장 총평"
 }}"""

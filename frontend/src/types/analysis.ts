@@ -46,6 +46,7 @@ export interface RiskAssessment {
   questions: string[];
   stages: CheckStage[];
   dataSource?: string;
+  evidence?: string[];
 }
 
 export interface PublicDocumentCheck {

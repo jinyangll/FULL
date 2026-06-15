@@ -14,6 +14,14 @@ def test_messages_shape_and_content():
     assert "JSON" in joined
 
 
+def test_prompt_requests_evidence_quotes():
+    msgs = build_messages("계약서 본문 텍스트", {"deposit": "1억원"}, [])
+    user = msgs[-1]["content"]
+    assert "evidence" in user
+    assert "그대로 인용" in user
+    assert "만들어 넣지 말 것" in user  # 환각 인용 금지 지침
+
+
 def test_supporting_docs_and_rules_in_prompt():
     from app.prompt import build_messages
     msgs = build_messages(

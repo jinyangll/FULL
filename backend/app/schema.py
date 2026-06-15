@@ -44,6 +44,7 @@ class RiskAssessment(BaseModel):
     action: str
     questions: list[str]
     stages: list[CheckStage]
+    evidence: list[str] = []  # 판단 근거가 된 계약서·공적서류 원문 인용
     dataSource: Optional[str] = None  # 공공데이터로 검증된 항목만 출처 표기(예: "국토교통부 실거래가 N건 기준")
 
 

@@ -19,11 +19,11 @@ export function useAnalyzeContract() {
   );
 
   const run = useCallback(
-    async (files: File[]) => {
+    async (files: File[], onProgress?: (step: number) => void) => {
       try {
         setStatus('uploading');
         setStatus('analyzing');
-        const response = await analyzeContract(files);
+        const response = await analyzeContract(files, onProgress);
 
         if (response.status === 'success' && response.data) {
           saveAnalysis(response.data);

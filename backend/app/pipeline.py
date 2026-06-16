@@ -46,7 +46,7 @@ def validate(files: list[InputFile]) -> AnalysisResponse | None:
     return None
 
 
-def analyze(files: list[InputFile], on_progress=None) -> AnalysisResponse:
+def analyze(files: list[InputFile], on_progress=None, on_sources=None) -> AnalysisResponse:
     err = validate(files)
     if err is not None:
         return err
@@ -85,6 +85,13 @@ def analyze(files: list[InputFile], on_progress=None) -> AnalysisResponse:
             if text and text.strip():
                 supporting.append((dt, text))
 
+        # 평가용: LLM 이 본 소스 원문(계약서+공적서류)을 외부로 흘려보낸다(API 응답엔 미포함).
+        if on_sources is not None:
+            try:
+                on_sources({"임대차계약서": contract_text, **{dt: t for dt, t in supporting}})
+            except Exception:
+                logger.exception("on_sources 콜백 실패(무시)")
+
         summary = upstage.extract(contract_text)
         # 실거래가를 chat 이전에 조회해, 그 결과를 LLM 프롬프트에 확정 사실로 주입한다.
         # (총평이 전세가율 판정과 모순되지 않도록. 추가 LLM 호출은 없고 순서만 바꾼다.)
@@ -102,6 +109,7 @@ def analyze(files: list[InputFile], on_progress=None) -> AnalysisResponse:
             _apply_jeonse_ratio(data, jeonse)
         if landlord is not None:
             _apply_blacklist_match(data, landlord)
+        data.contractText = contract_text
         return AnalysisResponse(status="success", data=data)
     except upstage.RateLimitExceeded:
         logger.warning("analyze() rate limit(429)")

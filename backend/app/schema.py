@@ -86,6 +86,7 @@ class AnalysisData(BaseModel):
     checklist: list[str]
     questions_to_ask: list[str]
     providedDocuments: list[str] = []
+    contractText: Optional[str] = None  # 파싱된 계약서 원문(프론트 하이라이팅용)
 
 
 class ErrorInfo(BaseModel):

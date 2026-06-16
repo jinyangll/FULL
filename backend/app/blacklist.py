@@ -11,6 +11,8 @@ import re
 
 from bs4 import BeautifulSoup
 
+from . import db
+
 logger = logging.getLogger(__name__)
 
 # 데이터 행 셀 순서(성명,나이,주소,임차보증금반환채무,이행기,채무불이행기간,보증채무이행일,구상채무,강제집행횟수,기준일)
@@ -127,31 +129,52 @@ def _fake() -> bool:
     return os.getenv("USE_FAKE_BLACKLIST", "false").lower() == "true"
 
 
-def _load_snapshot() -> list[dict]:
-    """로컬 스냅샷 CSV 로드(캐시). fake 모드면 캔드 명단. 파일 없으면 빈 리스트."""
+# aws rds 연결전 - csv에서 직접 읽기
+# def _load_snapshot() -> list[dict]:
+#     """로컬 스냅샷 CSV 로드(캐시). fake 모드면 캔드 명단. 파일 없으면 빈 리스트."""
+#     global _SNAPSHOT
+#     if _fake():
+#         return _FAKE_SNAPSHOT
+#     if _SNAPSHOT is not None:
+#         return _SNAPSHOT
+#     if not os.path.exists(_CSV_PATH):
+#         logger.info("악성임대인 스냅샷 없음: %s (대조 생략)", _CSV_PATH)
+#         _SNAPSHOT = []
+#         return _SNAPSHOT
+#     rows = []
+#     with open(_CSV_PATH, encoding="utf-8") as f:
+#         for row in csv.DictReader(f):
+#             rows.append({
+#                 "name": row.get("name", ""),
+#                 "birth_year": int(row["birth_year"]) if row.get("birth_year", "").isdigit() else 0,
+#                 "age": int(row["age"]) if row.get("age", "").isdigit() else 0,
+#                 "address": row.get("address", ""),
+#                 "deposit_debt": row.get("deposit_debt", ""),
+#                 "base_date": row.get("base_date", ""),
+#             })
+#     _SNAPSHOT = rows
+#     return _SNAPSHOT
+
+
+# aws rds 연결후 - rds에서 읽기
+def _load_snapshot()-> list[dict]:
+
+    """악성임대인 명단 로드(캐시). fake 모드면 캔드 명단. 테이블 비었으면 빈 리스트."""
     global _SNAPSHOT
     if _fake():
         return _FAKE_SNAPSHOT
     if _SNAPSHOT is not None:
         return _SNAPSHOT
-    if not os.path.exists(_CSV_PATH):
-        logger.info("악성임대인 스냅샷 없음: %s (대조 생략)", _CSV_PATH)
-        _SNAPSHOT = []
-        return _SNAPSHOT
-    rows = []
-    with open(_CSV_PATH, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            rows.append({
-                "name": row.get("name", ""),
-                "birth_year": int(row["birth_year"]) if row.get("birth_year", "").isdigit() else 0,
-                "age": int(row["age"]) if row.get("age", "").isdigit() else 0,
-                "address": row.get("address", ""),
-                "deposit_debt": row.get("deposit_debt", ""),
-                "base_date": row.get("base_date", ""),
-            })
+    
+    with db.connection() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT name, age, address, deposit_debt, base_date, birth_year FROM blacklist"
+        )
+        rows = cur.fetchall()
     _SNAPSHOT = rows
     return _SNAPSHOT
-
+    
 
 def match(owner_name: str, owner_birth: str | None, owner_address: str | None,
           snapshot: list[dict] | None = None) -> dict | None:

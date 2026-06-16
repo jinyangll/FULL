@@ -1,5 +1,5 @@
 import { ArrowLeft, Printer } from 'lucide-react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, ButtonLink } from '../components/common/Button';
 import AnalysisScopeCard from '../components/report/AnalysisScopeCard';
 import DisclaimerBox from '../components/report/DisclaimerBox';
@@ -21,6 +21,7 @@ type ReportTab = (typeof TABS)[number];
 export default function ReportPage() {
   const analysis = getAnalysis();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   if (!analysis) {
     return <Navigate to="/" replace />;
@@ -101,7 +102,17 @@ export default function ReportPage() {
 
         <div className={groupClass('detail')} data-group="detail">
           <SummaryCard summary={analysis.summary} />
-          {analysis.riskAssessments ? <RiskAssessmentList risks={analysis.riskAssessments} /> : null}
+          {analysis.riskAssessments ? (
+            <RiskAssessmentList
+              risks={analysis.riskAssessments}
+              contractText={analysis.contractText}
+              onSelectRisk={
+                analysis.contractText
+                  ? (id) => navigate(`/report/contract?focus=${encodeURIComponent(id)}`)
+                  : undefined
+              }
+            />
+          ) : null}
           {analysis.publicDocumentChecks ? <PublicDocumentCheckSection documents={analysis.publicDocumentChecks} /> : null}
         </div>
 

@@ -6,6 +6,7 @@ import LoadingPage from './pages/LoadingPage';
 import ProcessPage from './pages/ProcessPage';
 import ReportPreviewPage from './pages/ReportPreviewPage';
 import ReportPage from './pages/ReportPage';
+import ContractPage from './pages/ContractPage';
 import ServicePage from './pages/ServicePage';
 import UploadPage from './pages/UploadPage';
 import { getAnalysis, getPendingFilesMeta } from './lib/storage';
@@ -39,6 +40,16 @@ export const router = createBrowserRouter([
           return null;
         },
         element: <ReportPage />,
+      },
+      {
+        path: 'report/contract',
+        loader: () => {
+          if (!getAnalysis()) {
+            throw redirect('/');
+          }
+          return null;
+        },
+        element: <ContractPage />,
       },
       { path: 'error', element: <ErrorPage /> },
     ],

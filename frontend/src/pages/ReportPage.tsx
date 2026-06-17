@@ -13,7 +13,7 @@ import RiskAssessmentList from '../components/report/RiskAssessmentList';
 import SummaryCard from '../components/report/SummaryCard';
 import StageChecklistTimeline from '../components/report/StageChecklistTimeline';
 import ChatWidget from '../components/report/ChatWidget';
-import { getAnalysis } from '../lib/storage';
+import { getAnalysis, resolveSourceDocuments } from '../lib/storage';
 
 const TABS = ['summary', 'detail', 'action'] as const;
 type ReportTab = (typeof TABS)[number];
@@ -27,6 +27,7 @@ export default function ReportPage() {
     return <Navigate to="/" replace />;
   }
 
+  const sourceDocs = resolveSourceDocuments(analysis);
   const tabParam = searchParams.get('tab');
   const activeTab: ReportTab = TABS.includes(tabParam as ReportTab) ? (tabParam as ReportTab) : 'summary';
   const groupClass = (tab: ReportTab) =>
@@ -105,9 +106,9 @@ export default function ReportPage() {
           {analysis.riskAssessments ? (
             <RiskAssessmentList
               risks={analysis.riskAssessments}
-              contractText={analysis.contractText}
+              sourceDocuments={sourceDocs}
               onSelectRisk={
-                analysis.contractText
+                sourceDocs
                   ? (id) => navigate(`/report/contract?focus=${encodeURIComponent(id)}`)
                   : undefined
               }

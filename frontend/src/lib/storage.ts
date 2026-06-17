@@ -1,4 +1,15 @@
-import type { AnalysisData } from '../types/analysis';
+import type { AnalysisData, SourceDocument } from '../types/analysis';
+
+/** 하이라이트용 원본 문서 목록. 구버전 분석(contractText만 있는 경우)도 호환한다. */
+export function resolveSourceDocuments(analysis: AnalysisData): SourceDocument[] | undefined {
+  if (analysis.sourceDocuments && analysis.sourceDocuments.length > 0) {
+    return analysis.sourceDocuments;
+  }
+  if (analysis.contractText) {
+    return [{ docType: '임대차계약서', text: analysis.contractText }];
+  }
+  return undefined;
+}
 
 const ANALYSIS_KEY = 'analysis';
 const PENDING_FILE_KEY = 'pending-file-meta';

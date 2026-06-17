@@ -86,6 +86,12 @@ export interface AnalysisData {
   questions_to_ask: string[];
   providedDocuments?: string[];
   contractText?: string;
+  sourceDocuments?: SourceDocument[];
+}
+
+export interface SourceDocument {
+  docType: string;
+  text: string;
 }
 
 export interface AnalysisResponse {

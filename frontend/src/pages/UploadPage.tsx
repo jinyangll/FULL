@@ -61,7 +61,7 @@ export default function UploadPage() {
             </span>
 
             <h1 className="mt-8 max-w-2xl break-keep text-[42px] font-bold leading-[1.12] tracking-normal sm:text-6xl lg:text-[66px]">
-              전월세 계약서,
+              전월세 계약서<span className="text-[0.6em]">,</span>
               <br />
               서명 전에 먼저
               <br />

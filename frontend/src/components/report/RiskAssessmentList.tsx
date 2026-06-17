@@ -1,5 +1,5 @@
-import type { RiskAssessment, RiskLevel } from '../../types/analysis';
-import { extractSnippet, LEVEL_MARK_CLASS, type Snippet } from '../../lib/highlight';
+import type { RiskAssessment, RiskLevel, SourceDocument } from '../../types/analysis';
+import { extractSnippetFromDocs, LEVEL_MARK_CLASS, type Snippet } from '../../lib/highlight';
 import Badge from '../common/Badge';
 import Card from '../common/Card';
 import SectionHeading from '../common/SectionHeading';
@@ -23,12 +23,12 @@ export default function RiskAssessmentList({
   risks,
   onSelectRisk,
   activeRiskId,
-  contractText,
+  sourceDocuments,
 }: {
   risks: RiskAssessment[];
   onSelectRisk?: (id: string) => void;
   activeRiskId?: string | null;
-  contractText?: string;
+  sourceDocuments?: SourceDocument[];
 }) {
   const sorted = [...risks].sort((a, b) => order[a.level] - order[b.level]);
 
@@ -67,19 +67,19 @@ export default function RiskAssessmentList({
                 <InfoBlock title="현재 자료 기준 판단" value={risk.currentFinding} source={risk.dataSource} />
                 {(() => {
                   if (!risk.evidence || risk.evidence.length === 0) return null;
-                  // 근거 인용구를 미리 원문에서 찾아본다. 계약서에서 찾아진 것만 원문 페이지로
-                  // 이동하는 링크로 만들고, 외부 서류(등기부등본 등) 근거는 일반 텍스트로 둔다.
+                  // 근거 인용구를 원본 문서들(계약서·등기부등본 등)에서 찾아본다. 어느 문서에서든
+                  // 찾아진 것만 원문 페이지로 이동하는 링크로 만들고, 못 찾으면 일반 텍스트로 둔다.
                   const items = risk.evidence.map((quote) => ({
                     quote,
-                    snippet: contractText ? extractSnippet(contractText, quote) : null,
+                    snippet: extractSnippetFromDocs(sourceDocuments, quote),
                   }));
-                  const hasContractEvidence = items.some((it) => it.snippet !== null);
+                  const hasSourceEvidence = items.some((it) => it.snippet !== null);
                   return (
                     <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
                       <p className="text-xs font-bold text-brand-muted">
                         근거
-                        {onSelectRisk && hasContractEvidence ? (
-                          <span className="ml-1 font-medium text-brand-accent">· 클릭하면 계약서 원문에서 위치 보기 →</span>
+                        {onSelectRisk && hasSourceEvidence ? (
+                          <span className="ml-1 font-medium text-brand-accent">· 클릭하면 원문에서 위치 보기 →</span>
                         ) : null}
                       </p>
                       <ul className="mt-2 space-y-2">

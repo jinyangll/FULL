@@ -1,4 +1,4 @@
-import type { RiskLevel } from '../types/analysis';
+import type { RiskLevel, SourceDocument } from '../types/analysis';
 
 export interface HighlightInput {
   quote: string;
@@ -15,6 +15,17 @@ export interface Segment {
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// 토큰(글자·숫자) 사이는 공백·구두점·기호를 0개 이상 허용해 유연하게 매칭한다.
+// PDF 파싱은 공백을 붙이거나, evidence(LLM 정규화)는 콜론·중간점·괄호를 더하거나 빼는
+// 경우가 많아 원문과 자주 어긋나기 때문이다. (예: "주택 유형: 아파트" ↔ 원문 "주택 유형 아파트")
+const TOKEN_SEP = '[\\s\\p{P}\\p{S}]*';
+
+function buildPattern(quote: string): string | null {
+  const tokens = quote.trim().split(/[\s\p{P}\p{S}]+/u).filter(Boolean);
+  if (tokens.length === 0) return null;
+  return tokens.map(escapeRegExp).join(TOKEN_SEP);
 }
 
 /** 위험 등급별 하이라이트 배경색(원문 발췌·뷰어 공용). */
@@ -47,12 +58,11 @@ export interface Snippet {
  */
 export function extractSnippet(text: string, quote: string, pad = 40): Snippet | null {
   if (!text) return null;
-  const words = quote.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return null;
-  const pattern = words.map(escapeRegExp).join('\\s*');
+  const pattern = buildPattern(quote);
+  if (pattern === null) return null;
   let re: RegExp;
   try {
-    re = new RegExp(pattern);
+    re = new RegExp(pattern, 'u');
   } catch {
     return null;
   }
@@ -70,8 +80,24 @@ export function extractSnippet(text: string, quote: string, pad = 40): Snippet |
 }
 
 /**
- * 계약서 원문에서 evidence 인용구 위치를 찾아 하이라이트 구간으로 쪼갠다.
- * 인용구는 원문 그대로지만 PDF 파싱/줄바꿈 차이가 있을 수 있어 공백은 유연하게 매칭한다.
+ * 여러 원본 문서(계약서·등기부등본 등)에서 인용구를 차례로 찾아 첫 발췌를 돌려준다.
+ * 근거가 어느 문서에서 나왔든 그 문서에서 강조해 보여주기 위함이다. 못 찾으면 null.
+ */
+export function extractSnippetFromDocs(
+  docs: SourceDocument[] | undefined,
+  quote: string,
+  pad = 40,
+): Snippet | null {
+  for (const doc of docs ?? []) {
+    const snippet = extractSnippet(doc.text, quote, pad);
+    if (snippet) return snippet;
+  }
+  return null;
+}
+
+/**
+ * 문서 원문에서 evidence 인용구 위치를 찾아 하이라이트 구간으로 쪼갠다.
+ * 인용구는 원문 그대로지만 PDF 파싱/줄바꿈 차이가 있을 수 있어 공백·구두점은 유연하게 매칭한다.
  * 겹치는 구간은 먼저 시작한 것을 우선한다. 못 찾은 인용구는 조용히 건너뛴다.
  */
 export function buildHighlightSegments(text: string, highlights: HighlightInput[]): Segment[] {
@@ -80,17 +106,14 @@ export function buildHighlightSegments(text: string, highlights: HighlightInput[
   const intervals: Interval[] = [];
   const seen = new Set<string>();
   for (const { quote, level, riskId } of highlights) {
-    const words = quote.trim().split(/\s+/).filter(Boolean);
-    if (words.length === 0) continue;
     const key = `${riskId}::${quote}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    // 공백 0개 이상으로 연결한다. PDF 파싱은 공백을 붙이거나(보증금500…) 자간을
-    // 벌리는 경우가 많아, evidence(정규화된 공백)와 원문이 \s+ 로는 자주 어긋난다.
-    const pattern = words.map(escapeRegExp).join('\\s*');
+    const pattern = buildPattern(quote);
+    if (pattern === null) continue;
     let re: RegExp;
     try {
-      re = new RegExp(pattern, 'g');
+      re = new RegExp(pattern, 'gu');
     } catch {
       continue;
     }

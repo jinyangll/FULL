@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from app import upstage, realprice, lawd, blacklist
 from app.prompt import build_messages
 from app.mapper import is_contract, parse_llm_json, build_data, count_levels
-from app.schema import AnalysisResponse, ErrorInfo, RiskCounts
+from app.schema import AnalysisResponse, ErrorInfo, RiskCounts, SourceDocument
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +110,10 @@ def analyze(files: list[InputFile], on_progress=None, on_sources=None) -> Analys
         if landlord is not None:
             _apply_blacklist_match(data, landlord)
         data.contractText = contract_text
+        # 근거 하이라이트는 계약서뿐 아니라 공적서류 원문에서도 찾도록 모든 문서를 싣는다.
+        data.sourceDocuments = [SourceDocument(docType="임대차계약서", text=contract_text)] + [
+            SourceDocument(docType=dt, text=t) for dt, t in supporting
+        ]
         return AnalysisResponse(status="success", data=data)
     except upstage.RateLimitExceeded:
         logger.warning("analyze() rate limit(429)")

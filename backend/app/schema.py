@@ -74,6 +74,11 @@ class Risk(BaseModel):
     explanation: str
 
 
+class SourceDocument(BaseModel):
+    docType: str  # "임대차계약서", "등기부등본" 등
+    text: str     # 파싱된 원문(프론트 하이라이팅용)
+
+
 class AnalysisData(BaseModel):
     summary: AnalysisSummary
     riskCounts: RiskCounts
@@ -86,7 +91,8 @@ class AnalysisData(BaseModel):
     checklist: list[str]
     questions_to_ask: list[str]
     providedDocuments: list[str] = []
-    contractText: Optional[str] = None  # 파싱된 계약서 원문(프론트 하이라이팅용)
+    contractText: Optional[str] = None  # 파싱된 계약서 원문(프론트 하이라이팅용·레거시)
+    sourceDocuments: list[SourceDocument] = []  # 계약서+공적서류 원문(문서별 하이라이팅용)
 
 
 class ErrorInfo(BaseModel):
